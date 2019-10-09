@@ -1,10 +1,11 @@
 <template>
+  <div>
+    <div style="text-align: left;margin-top: 10px;margin-bottom: 10px;">
+      <button>用例管理</button> |
+      <button>统计分析</button>
+    </div>
     <div>
-        <div>
-        <button>用例管理</button>  |  
-        <button>统计分析</button>
-        </div>
-    <table border="2" style="border:1px solid black;">
+      <table border="2" style="border:1px solid black;">
         <tbody>执行情况</tbody>
         <th>序号</th>
         <th>名称</th>
@@ -13,31 +14,39 @@
         <th>成功率</th>
         <th>通过率</th>
         <th>操作</th>
-        <tr>
-            <td>1</td>
-            <td>2</td>
-            <td>2</td>
-            <td>2</td>
-            <td>2</td>
-            <td>2</td>
-            <button style="background-color: #4CAF50;border: none;color: white;padding: 1px 5px;text-align: center;text-decoration: none;display: inline-block;font-size: 16px;">详情</button>
-            <button>删除</button>
+        <tr v-for="item in list_ttt.reslist" :key="item.zxbh">
+          <td>{{item.zxbh}}</td>
+          <td>{{item.ylmc}}</td>
+          <td>{{item.zxsj}}</td>
+          <td>{{item.fgl}}</td>
+          <td>{{item.cgl}}</td>
+          <td>{{item.tgl}}</td>
+          <button>详情</button>
+          <button>删除</button>
         </tr>
-    </table>
+      </table>
     </div>
+  </div>
 </template>
 
 <script>
 export default {
-//   name: 'HelloWorld',
-//   props: {
-//     msg: String
-//   }
-}
+  name: "list",
+  data() {
+    return {
+      list_ttt: []
+    };
+  },
+  methods: {
+    getzxxx() {
+      this.$http.get("http://172.18.49.18:8585/testapi/zx_list/2")
+        .then(function(response) {
+          this.list_ttt = response.body;
+        });
+    }
+  },
+  created(){
+      this.getzxxx()
+  }
+};
 </script>
-
-<style scoped>
-{
-
-}
-</style>
