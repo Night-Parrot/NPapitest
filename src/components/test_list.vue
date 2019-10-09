@@ -39,7 +39,7 @@ export default {
   },
   methods: {
     getzxxx() {
-      this.$http.get("http://172.18.49.18:8585/testapi/zx_list/2")
+      this.$http.get("http://localhost:8585/testurl2/zx_list/1")
         .then(function(response) {
           this.list_ttt = response.body;
         });
