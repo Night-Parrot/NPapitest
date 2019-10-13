@@ -2,8 +2,9 @@ import Vue from 'vue'
 import Router from 'vue-router'
 import Home from './views/Home.vue'
 import testlist from './components/test_list.vue'
-import zx_list from './components/zx_list.vue'
+import xm_info from './components/xm_info.vue'
 import about from './views/About.vue'
+import test_page from './components/test.vue'
 
 Vue.use(Router)
 
@@ -28,9 +29,14 @@ export default new Router({
       component: testlist
     },
     {
-      path: '/zx_list',
-      name: 'zx_list',
-      component: zx_list
+      path: '/xm_info/:xmid',
+      name: 'xm_info',
+      component: xm_info
+    },
+    {
+      path: '/testpage',
+      name: '测试页面',
+      component: test_page
     }
   ]
 })

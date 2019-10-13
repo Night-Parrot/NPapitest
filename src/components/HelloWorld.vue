@@ -1,8 +1,9 @@
 <template>
   <div>
     <div style="float: left;margin-left: 15px;width: 15%;margin-top: 15px;">
-      <a-table :dataSource="data" :columns="columns" :pagination="pagination" :scroll="{ y: 840}">
-        <a slot="name" slot-scope="text" href="javascript:;">{{text}}</a>
+      <a-table :dataSource="data" :columns="columns" :pagination="pagination" :scroll="{ y: 840}" :rowKey="record => record.key">
+        <!-- slot-scope 用来绑定record -->
+        <router-link :to="{ path: '/xm_info/' + record.key }" slot="name" slot-scope="text, record">{{text}}</router-link>
         <div
           slot="filterDropdown"
           slot-scope="{ setSelectedKeys, selectedKeys, confirm, clearFilters, column }"
@@ -96,13 +97,13 @@ export default {
     return {
       data: [
         {
-          key: "1",
+          key: "qweqweqweqwe",
           name: "T3C-立案",
           age: 32,
           address: "New York No. 1 Lake Park"
         },
         {
-          key: "2",
+          key: "testurl2",
           name: "T3C-审判",
           age: 42,
           address: "London No. 1 Lake Park"
@@ -264,7 +265,7 @@ export default {
           scopedSlots: {
             filterDropdown: "filterDropdown",
             filterIcon: "filterIcon",
-            customRender: "customRender"
+            customRender: "name"
           },
           onFilter: (value, record) =>
             record.name.toLowerCase().includes(value.toLowerCase()),
@@ -347,7 +348,7 @@ export default {
       ],
       data_zx: [
         {
-          key: "1",
+          key: "xm_info",
           name: "T3C-立案",
           ylmc: "立案流程V2.5.4-新增当事人",
           tgl: "65%",
@@ -495,6 +496,10 @@ export default {
         });
       this.chart = chart;
       this.chart.render();
+    },
+    zx_info(key) {
+      // alert("这是点击事件")
+      alert("key:" + key)
     }
   }
 };
