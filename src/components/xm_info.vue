@@ -60,13 +60,12 @@
       >
         <div>
           <H8>暂时没想好统计内容</H8>
-          <H8>有想法请联系梁磊</H8>
         </div>
       </a-drawer>
     </div>
     <!-- ============================================================================================================================= -->
     <!-- 详情的抽屉 -->
-    <div>
+    <div style="float: left">
       <a-drawer
         title="执行情况"
         :placement="placement"
@@ -74,19 +73,20 @@
         @close="onClose"
         :visible="visible_zxinfo"
         :destroyOnClose="true"
-        height="800"
+        height="900"
       >
-        <div>
-          <div id="char_cgl" style="float: left;"></div>
+        <a-button @click="init_char_cgl()">绘制表格</a-button>
+        <div style="float: left;width:20%">
+          <div id="char_cgl" style="float: left;margin-top: 10px;margin-right: 10px;"></div>
           <div id="char_tgl" style="float: left;"></div>
         </div>
-        <div>
+        <div style="float: right;margin-top: 10px;width: 75%">
           <a-table
             :columns="columns_zxinfo"
             :dataSource="data_zxinfo"
             class="components-table-demo-nested"
-            :scroll="{y:550}"
-            size="middle"
+            :scroll="{y:700}"
+            size="small"
           >
             <a-table
               slot="expandedRowRender"
@@ -293,12 +293,12 @@ const data_zxinfo = [];
 for (let i = 0; i < 10; ++i) {
   data_zxinfo.push({
     key: i,
-    name: "Screem",
-    platform: "iOS",
-    version: "10.3.4.5654",
-    upgradeNum: 500,
-    creator: "Jack",
-    createdAt: "2014-12-24 23:12:00"
+    name: "案件签收",
+    platform: "/zx/ajqs",
+    version: "355ms",
+    upgradeNum: "2014-12-24 23:12:00",
+    creator: "200",
+    createdAt: "通过"
   });
 }
 
@@ -329,9 +329,12 @@ const innerColumns_zxinfo = [
 const innerData_zxinfo = [
   {
     key: 1,
-    date: "2014-12-24 23:12:00",
-    name: "This is production name",
-    upgradeNum: "Upgraded: 56"
+    date:
+      "{'name': '张三', 'para': '35.65','name': '张三', 'para': '35.65','name': '张三', 'para': '35.65','name': '张三', 'para': '35.65'}",
+    name:
+      "{'name': '张三', 'para': '35.65','name': '张三', 'para': '35.65','name': '张三', 'para': '35.65','name': '张三', 'para': '35.65'}",
+    upgradeNum:
+      "{'name': '张三', 'para': '35.65','name': '张三', 'para': '35.65','name': '张三', 'para': '35.65','name': '张三', 'para': '35.65'}"
   }
 ];
 
@@ -339,9 +342,15 @@ const innerData_zxinfo = [
 
 export default {
   mounted() {
-    this.xmid = "testurl2";
+    this.xmid = "testapi";
     this.fetch(1);
   },
+  // watch: {
+  //     visible_zxinfo: function (val, oldVal) {
+  //       console.log('new: %s, old: %s', val, oldVal)
+  //     this.init_char_cgl();
+  //   }
+  // },
   data() {
     return {
       data_char_cgl: data_char_cgl,
@@ -431,7 +440,7 @@ export default {
     fetch(pagenum) {
       this.loading = true;
       this.$http
-        .get("http://localhost:8585/" + this.xmid + "/zx_list/" + pagenum)
+        .get("http://172.18.49.18:8585/" + this.xmid + "/zx_list/" + pagenum)
         .then(function(response) {
           var time = {};
           for (time in response.body.reslist) {
@@ -472,6 +481,7 @@ export default {
     },
     click_zxinfo(key) {
       this.visible_zxinfo = true;
+      // this.init_char_cgl();
     },
     click_del(key) {
       alert("delkey:" + key);
@@ -505,11 +515,12 @@ export default {
       }
     },
     init_char_cgl() {
+      console.log("++++++++++++++++++++++");
       var chart = new G2.Chart({
         container: "char_cgl",
-        forceFit: true,
-        height: window.innerHeight,
-        animate: false
+        // forceFit: true,
+        height: 300,
+        animate: true
       });
       chart.source(data_char_cgl, {
         percent: {
