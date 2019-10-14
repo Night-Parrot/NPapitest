@@ -65,7 +65,7 @@
     </div>
     <!-- ============================================================================================================================= -->
     <!-- 详情的抽屉 -->
-    <div style="float: left">
+    <div style="float: left;">
       <a-drawer
         title="执行情况"
         :placement="placement"
@@ -75,18 +75,30 @@
         :destroyOnClose="true"
         height="900"
       >
-        <a-button @click="init_char_cgl()">绘制表格</a-button>
-        <div style="float: left;width:20%">
-          <div id="char_cgl" style="float: left;margin-top: 10px;margin-right: 10px;"></div>
+        <div style="float: left;width: 24%;">
+          <div id="char_xysj" style="float: left;"></div>
+          <div id="char_cgl" style="float: left;"></div>
           <div id="char_tgl" style="float: left;"></div>
         </div>
-        <div style="float: right;margin-top: 10px;width: 75%">
+        <div style="float: right;width: 75%;">
+          <a-radio-group
+            :value="target_key"
+            @change="handleSizeChange"
+            style="margin-left:5px;margin-right:5px;margin-top: 5px;margin-bottom: 5px"
+          >
+            <a-radio-button value="1">全部</a-radio-button>
+            <a-radio-button value="2">请求成功</a-radio-button>
+            <a-radio-button value="3">请求失败</a-radio-button>
+            <a-radio-button value="4">验证通过</a-radio-button>
+            <a-radio-button value="5">验证失败</a-radio-button>
+          </a-radio-group>
           <a-table
             :columns="columns_zxinfo"
             :dataSource="data_zxinfo"
             class="components-table-demo-nested"
             :scroll="{y:700}"
-            size="small"
+            size="middle"
+            style="margin-left:5px;margin-right:5px;"
           >
             <a-table
               slot="expandedRowRender"
@@ -102,6 +114,26 @@
     </div>
 
     <!-- ============================================================================================================================= -->
+    <!-- 生成用例的抽屉 -->
+    <div>
+      <a-drawer
+        title="用例生成模板"
+        :placement="placement_ylsc"
+        :closable="true"
+        @close="onClose"
+        :visible="visible_ylsc"
+        :destroyOnClose="true"
+        height="600"
+      >
+        <div>
+          <a-input placeholder="请输入swagger地址" style="margin-top: 20px"/>
+          <a-input placeholder="如有需要，请输入cookie" style="margin-top: 20px"/>
+          <a-button type="primary" style="margin-top: 20px">生成用例</a-button>
+        </div>
+      </a-drawer>
+    </div>
+
+    <!-- =============================================================================================================================== -->
     <div style="margin-left: 30px;">
       <a-button
         type="primary"
@@ -116,6 +148,13 @@
         style="margin-top: 15px"
         @click="showDrawer_tjfx"
       >统计分析</a-button>
+      <a-divider type="vertical" />
+      <a-button
+        type="primary"
+        :loading="loading"
+        style="margin-top: 15px"
+        @click="showDrawer_ylsc"
+      >用例模板生成</a-button>
     </div>
     <div>
       <a-table
@@ -342,7 +381,7 @@ const innerData_zxinfo = [
 
 export default {
   mounted() {
-    this.xmid = "testapi";
+    this.xmid = "testurl2";
     this.fetch(1);
   },
   // watch: {
@@ -353,11 +392,244 @@ export default {
   // },
   data() {
     return {
+      target_key: "1",
       data_char_cgl: data_char_cgl,
       columns_zxinfo: columns_zxinfo,
       innerColumns_zxinfo: innerColumns_zxinfo,
       data_zxinfo: data_zxinfo,
       innerData_zxinfo: innerData_zxinfo,
+      char_xysj: [
+        {
+          date: "接口111",
+          actual: 175,
+          expected: 400
+        },
+        {
+          date: "接口222",
+          actual: 137,
+          expected: 400
+        },
+        {
+          date: "2017年3月4日",
+          actual: 240,
+          expected: 400
+        },
+        {
+          date: "2017年3月5日",
+          actual: 726,
+          expected: 400
+        },
+        {
+          date: "2017年3月6日",
+          actual: 968,
+          expected: 400
+        },
+        {
+          date: "2017年3月7日",
+          actual: 702,
+          expected: 400
+        },
+        {
+          date: "2017年3月8日",
+          actual: 655,
+          expected: 400
+        },
+        {
+          date: "2017年3月9日",
+          actual: 463,
+          expected: 400
+        },
+        {
+          date: "2017年3月10日",
+          actual: 464,
+          expected: 400
+        },
+        {
+          date: "2017年3月12日",
+          actual: 12,
+          expected: 400
+        },
+        {
+          date: "2017年3月13日",
+          actual: 638,
+          expected: 400
+        },
+        {
+          date: "2017年3月14日",
+          actual: 101,
+          expected: 400
+        },
+        {
+          date: "2017年3月15日",
+          actual: 202,
+          expected: 400
+        },
+        {
+          date: "2017年3月16日",
+          actual: 509,
+          expected: 400
+        },
+        {
+          date: "2017年3月17日",
+          actual: 269,
+          expected: 400
+        },
+        {
+          date: "2017年3月18日",
+          actual: 321,
+          expected: 400
+        },
+        {
+          date: "2017年3月19日",
+          actual: 235,
+          expected: 400
+        },
+        {
+          date: "2017年3月20日",
+          actual: 399,
+          expected: 400
+        },
+        {
+          date: "2017年3月21日",
+          actual: 662,
+          expected: 400
+        },
+        {
+          date: "2017年3月22日",
+          actual: 689,
+          expected: 400
+        },
+        {
+          date: "2017年3月23日",
+          actual: 347,
+          expected: 400
+        },
+        {
+          date: "2017年3月24日",
+          actual: 1485,
+          expected: 400
+        },
+        {
+          date: "2017年3月26日",
+          actual: 428,
+          expected: 400
+        },
+        {
+          date: "2017年3月27日",
+          actual: 749,
+          expected: 400
+        },
+        {
+          date: "2017年3月28日",
+          actual: 752,
+          expected: 400
+        },
+        {
+          date: "2017年3月29日",
+          actual: 658,
+          expected: 400
+        },
+        {
+          date: "2017年3月30日",
+          actual: 69.1,
+          expected: 400
+        },
+        {
+          date: "2017年3月31日",
+          actual: 69.1,
+          expected: 400
+        },
+        {
+          date: "2017年3月32日",
+          actual: 69.1,
+          expected: 400
+        },
+        {
+          date: "2017年3月33日",
+          actual: 69.1,
+          expected: 400
+        },
+        {
+          date: "2017年3月34日",
+          actual: 69.1,
+          expected: 400
+        },
+        {
+          date: "2017年3月35日",
+          actual: 69.1,
+          expected: 400
+        },
+        {
+          date: "2017年3月36日",
+          actual: 69.1,
+          expected: 400
+        },
+        {
+          date: "2017年3月37日",
+          actual: 69.1,
+          expected: 400
+        },
+        {
+          date: "2017年3月38日",
+          actual: 69.1,
+          expected: 400
+        },
+        {
+          date: "2017年3月39日",
+          actual: 69.1,
+          expected: 400
+        },
+        {
+          date: "2017年3月40日",
+          actual: 69.1,
+          expected: 400
+        },
+        {
+          date: "2017年3月41日",
+          actual: 69.1,
+          expected: 400
+        },
+        {
+          date: "2017年3月42日",
+          actual: 69.1,
+          expected: 400
+        },
+        {
+          date: "2017年3月43日",
+          actual: 69.1,
+          expected: 400
+        },
+        {
+          date: "2017年3月44日",
+          actual: 69.1,
+          expected: 400
+        },
+        {
+          date: "2017年3月45日",
+          actual: 69.1,
+          expected: 400
+        },
+        {
+          date: "2017年3月46日",
+          actual: 69.1,
+          expected: 400
+        },
+        {
+          date: "2017年3月47日",
+          actual: 69.1,
+          expected: 400
+        },
+        {
+          date: "2017年3月48日",
+          actual: 669.1,
+          expected: 400
+        },
+        {
+          date: "2017年3月50日",
+          actual: 169.1,
+          expected: 400
+        }
+      ],
       data: [],
       columns_yl: columns_yl,
       columns: columns,
@@ -407,9 +679,11 @@ export default {
       xmid: "",
       visible_ylgl: false,
       visible_tjfx: false,
+      visible_ylsc: false,
       fileList: [],
       headers_upload: "authorization-text",
       placement: "top",
+      placement_ylsc: "bottom",
       pagination: {
         defaultPageSize: 10,
         total: null,
@@ -432,15 +706,19 @@ export default {
     showDrawer_tjfx() {
       this.visible_tjfx = true;
     },
+    showDrawer_ylsc() {
+      this.visible_ylsc = true;
+    },
     onClose() {
       this.visible_ylgl = false;
       this.visible_tjfx = false;
       this.visible_zxinfo = false;
+      this.visible_ylsc = false;
     },
     fetch(pagenum) {
       this.loading = true;
       this.$http
-        .get("http://172.18.49.18:8585/" + this.xmid + "/zx_list/" + pagenum)
+        .get("http://localhost:8585/" + this.xmid + "/zx_list/" + pagenum)
         .then(function(response) {
           var time = {};
           for (time in response.body.reslist) {
@@ -481,6 +759,10 @@ export default {
     },
     click_zxinfo(key) {
       this.visible_zxinfo = true;
+      this.target_key = "1";
+      setTimeout(() => {
+        this.init_char_cgl(), this.init_char_tgl(), this.init_char_xysj();
+      }, 500);
       // this.init_char_cgl();
     },
     click_del(key) {
@@ -519,10 +801,11 @@ export default {
       var chart = new G2.Chart({
         container: "char_cgl",
         // forceFit: true,
-        height: 300,
+        height: 250,
+        width: 465,
         animate: true
       });
-      chart.source(data_char_cgl, {
+      chart.source(this.data_char_cgl, {
         percent: {
           formatter: function formatter(val) {
             val = val * 100 + "%";
@@ -570,7 +853,127 @@ export default {
       chart.render();
       interval.setSelected(data_char_cgl[0]);
     },
-    init_char_tgl() {}
+    init_char_tgl() {
+      console.log("++++++++++++++++++++++");
+      var chart = new G2.Chart({
+        container: "char_tgl",
+        // forceFit: true,
+        height: 250,
+        width: 465,
+        animate: true
+        // padding: [50, 250, 50, 50],
+      });
+      chart.source(this.data_char_cgl, {
+        percent: {
+          formatter: function formatter(val) {
+            val = val * 100 + "%";
+            return val;
+          }
+        }
+      });
+      chart.coord("theta", {
+        radius: 0.75,
+        innerRadius: 0.6
+      });
+      chart.tooltip({
+        showTitle: false,
+        itemTpl:
+          '<li><span style="background-color:{color};" class="g2-tooltip-marker"></span>{name}: {value}</li>'
+      });
+      // 辅助文本
+      chart.guide().html({
+        position: ["50%", "50%"],
+        html:
+          '<div style="color:#8c8c8c;font-size: 14px;text-align: center;width: 10em;">通过率</div>',
+        alignX: "middle",
+        alignY: "middle"
+      });
+      var interval = chart
+        .intervalStack()
+        .position("percent")
+        .color("item")
+        .label("percent", {
+          formatter: function formatter(val, item) {
+            return item.point.item + ": " + val;
+          }
+        })
+        .tooltip("item*percent", function(item, percent) {
+          percent = percent * 100 + "%";
+          return {
+            name: item,
+            value: percent
+          };
+        })
+        .style({
+          lineWidth: 1,
+          stroke: "#fff"
+        });
+      chart.render();
+      interval.setSelected(data_char_cgl[0]);
+    },
+    init_char_xysj() {
+      var chart = new G2.Chart({
+        container: "char_xysj",
+        height: 300,
+        width: 465,
+        padding: [0, 100, 60, 100]
+      });
+      chart.source(this.char_xysj, {
+        expected: {
+          ticks: [0, 400, 1200]
+        }
+      });
+      chart.axis("date", false);
+      chart.axis("actual", false);
+      chart.axis("expected", {
+        line: null,
+        tickLine: null,
+        position: "right",
+        label: {
+          formatter: function formatter(val) {
+            if (val === "1200") {
+              return "";
+            }
+            return val;
+          }
+        }
+      });
+      chart.legend(false);
+      chart
+        .interval()
+        .position("date*expected")
+        .color("#87CEFA")
+        .shape("borderRadius")
+        .tooltip("expected")
+        .opacity(0.6);
+      chart
+        .interval()
+        .position("date*actual")
+        .color("#db0d2d")
+        .tooltip("actual")
+        .shape("date*actual", function(date, val) {
+          if (val === 0) {
+            return;
+          } else {
+            return "borderRadius";
+          }
+        });
+      chart.guide().text({
+        position: ["min", "min"],
+        content: "响应时间分布",
+        style: {
+          fill: "#ff2c55",
+          fontSize: 20,
+          fontWeight: "bold",
+          textBaseline: "top"
+        }
+      });
+      chart.render();
+    },
+    handleSizeChange(e) {
+      this.target_key = e.target.value;
+      console.log(e.target.value);
+    }
   }
 };
 </script>
