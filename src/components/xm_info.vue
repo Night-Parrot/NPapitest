@@ -12,16 +12,19 @@
         height="800"
       >
         <div>
-          <div style="margin-left: 30px;">
-            <a-upload
-              name="file"
-              :multiple="true"
-              action
-              :headers="headers_upload"
-              @change="handleChange"
-            >
-              <a-button type="primary" :loading="loading" style="margin-top: 15px">用例上传</a-button>
+          <div style="margin-left: 30px;" class="clearfix">
+            <a-upload :fileList="fileList" :remove="handleRemove" :beforeUpload="beforeUpload">
+              <a-button>
+                <a-icon type="upload" />选择用例文件
+              </a-button>
             </a-upload>
+            <a-button
+              type="primary"
+              @click="handleUpload"
+              :disabled="fileList.length === 0"
+              :loading="uploading"
+              style="margin-top: 16px"
+            >{{uploading ? 'Uploading' : '上传' }}</a-button>
           </div>
           <a-table
             :columns="columns_yl"
@@ -126,8 +129,8 @@
         height="600"
       >
         <div>
-          <a-input placeholder="请输入swagger地址" style="margin-top: 20px"/>
-          <a-input placeholder="如有需要，请输入cookie" style="margin-top: 20px"/>
+          <a-input placeholder="请输入swagger地址" style="margin-top: 20px" />
+          <a-input placeholder="如有需要，请输入cookie" style="margin-top: 20px" />
           <a-button type="primary" style="margin-top: 20px">生成用例</a-button>
         </div>
       </a-drawer>
@@ -176,6 +179,9 @@
     </div>
   </div>
 </template>
+
+
+
 <script>
 import G2 from "@antv/g2";
 const columns = [
@@ -381,15 +387,9 @@ const innerData_zxinfo = [
 
 export default {
   mounted() {
-    this.xmid = "testurl2";
+    this.xmid = "testapi";
     this.fetch(1);
   },
-  // watch: {
-  //     visible_zxinfo: function (val, oldVal) {
-  //       console.log('new: %s, old: %s', val, oldVal)
-  //     this.init_char_cgl();
-  //   }
-  // },
   data() {
     return {
       target_key: "1",
@@ -681,7 +681,7 @@ export default {
       visible_tjfx: false,
       visible_ylsc: false,
       fileList: [],
-      headers_upload: "authorization-text",
+      uploading: false,
       placement: "top",
       placement_ylsc: "bottom",
       pagination: {
@@ -714,11 +714,13 @@ export default {
       this.visible_tjfx = false;
       this.visible_zxinfo = false;
       this.visible_ylsc = false;
+      this.fileList = [];
+      this.uploading = false;
     },
     fetch(pagenum) {
       this.loading = true;
       this.$http
-        .get("http://localhost:8585/" + this.xmid + "/zx_list/" + pagenum)
+        .get("http://172.18.49.18:8585/" + this.xmid + "/zx_list/" + pagenum)
         .then(function(response) {
           var time = {};
           for (time in response.body.reslist) {
@@ -784,17 +786,6 @@ export default {
       return (
         y + "-" + m + "-" + d + " " + "　" + h + ":" + minute + ":" + second
       );
-    },
-    handleChange(info) {
-      if (info.file.status !== "uploading") {
-        // console.log(info.file, info.fileList);
-      }
-      if (info.file.status === "done") {
-        this.$message.success(`${info.file.name} file uploaded successfully`);
-        this.fileList = []; //也许可以清理掉已上传列表
-      } else if (info.file.status === "error") {
-        this.$message.error(`${info.file.name} file upload failed.`);
-      }
     },
     init_char_cgl() {
       console.log("++++++++++++++++++++++");
@@ -973,6 +964,43 @@ export default {
     handleSizeChange(e) {
       this.target_key = e.target.value;
       console.log(e.target.value);
+    },
+    handleRemove(file) {
+      const index = this.fileList.indexOf(file);
+      const newFileList = this.fileList.slice();
+      newFileList.splice(index, 1);
+      this.fileList = newFileList;
+    },
+    beforeUpload(file) {
+      this.fileList = [...this.fileList, file];
+      return false;
+    },
+    handleUpload() {
+      debugger;
+      const { fileList } = this;
+      console.log(fileList)
+      const formData = new FormData();
+      fileList.forEach(file => {
+        formData.append("files[]", file);
+      });
+      console.log(fileList)
+      this.uploading = true;
+      this.$http
+        .post("http://172.18.49.18:8585/uploadfile", {
+          xmdz: this.xmid,
+          file: formData
+        },{emulateJSON:true})
+        .then(function(res) {
+          console.log(res.response.body.result)
+          if (!res.ok) {
+            this.uploading = false;
+            this.$message.success("upload fial.");
+          } else {
+            this.fileList = [];
+            this.uploading = false;
+            this.$message.success("upload successfully.");
+          }
+        });
     }
   }
 };
