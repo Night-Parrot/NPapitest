@@ -11,40 +11,44 @@
         :destroyOnClose="true"
         height="800"
       >
-        <div>
-          <div style="margin-left: 30px;" class="clearfix">
+        <div style="float: left; width: 100%">
+          <div style="float: left;margin-left: 30px;">
             <a-upload :fileList="fileList" :remove="handleRemove" :beforeUpload="beforeUpload">
-              <a-button>
+              <a-button :disabled="fileList.length === 1">
                 <a-icon type="upload" />选择用例文件
               </a-button>
             </a-upload>
+          </div>
+          <div style="float: left;">
             <a-button
               type="primary"
               @click="handleUpload"
               :disabled="fileList.length === 0"
               :loading="uploading"
-              style="margin-top: 16px"
-            >{{uploading ? 'Uploading' : '上传' }}</a-button>
+              style="margin-left: 20px"
+            >{{uploading ? '正在上传' : '上传' }}</a-button>
           </div>
-          <a-table
-            :columns="columns_yl"
-            :rowKey="record => record.zxbh"
-            :dataSource="data_yl"
-            :pagination="pagination"
-            :loading="loading"
-            size="small"
-            @change="handleTableChange_ylxx"
-            style="margin-left: 30px;margin-right: 30px;margin-top: 15px"
-          >
-            <H3 slot="title">用例列表</H3>
-            <span slot="action_yl" slot-scope="record">
-              <a-button type="primary" :loading="loading" @click="click_info(record.ylmc)">执行</a-button>
-              <a-divider type="vertical" />
-              <a-button type="primary" :loading="loading" @click="click_del(record.scsj)">下载</a-button>
-              <a-divider type="vertical" />
-              <a-button type="primary" :loading="loading" @click="click_del(record.zxcs)">删除</a-button>
-            </span>
-          </a-table>
+          <div>
+            <a-table
+              :columns="columns_yl"
+              :rowKey="record => record.zxbh"
+              :dataSource="data_yl"
+              :pagination="pagination"
+              :loading="loading"
+              size="middle"
+              @change="handleTableChange_ylxx"
+              style="margin-left: 30px;margin-right: 30px;margin-top: 15px"
+            >
+              <H3 slot="title">用例列表</H3>
+              <span slot="action_yl" slot-scope="record">
+                <a-button type="primary" :loading="loading" @click="click_info(record.ylmc)">执行</a-button>
+                <a-divider type="vertical" />
+                <a-button type="primary" :loading="loading" @click="click_del(record.scsj)">下载</a-button>
+                <a-divider type="vertical" />
+                <a-button type="primary" :loading="loading" @click="click_del(record.zxcs)">删除</a-button>
+              </span>
+            </a-table>
+          </div>
         </div>
       </a-drawer>
     </div>
@@ -387,7 +391,7 @@ const innerData_zxinfo = [
 
 export default {
   mounted() {
-    this.xmid = "testapi";
+    this.xmid = "testurl2";
     this.fetch(1);
   },
   data() {
@@ -720,7 +724,7 @@ export default {
     fetch(pagenum) {
       this.loading = true;
       this.$http
-        .get("http://172.18.49.18:8585/" + this.xmid + "/zx_list/" + pagenum)
+        .get("http://localhost:8585/" + this.xmid + "/zx_list/" + pagenum)
         .then(function(response) {
           var time = {};
           for (time in response.body.reslist) {
@@ -976,29 +980,27 @@ export default {
       return false;
     },
     handleUpload() {
-      debugger;
       const { fileList } = this;
-      console.log(fileList)
       const formData = new FormData();
+      formData.append("xmdz", this.xmid);
       fileList.forEach(file => {
-        formData.append("files[]", file);
+        formData.append("file", file);
       });
-      console.log(fileList)
       this.uploading = true;
       this.$http
-        .post("http://172.18.49.18:8585/uploadfile", {
-          xmdz: this.xmid,
-          file: formData
-        },{emulateJSON:true})
+        .post("http://localhost:8585/uploadfile", formData, {
+          headers: { "Content-Type": "multipart/form-data", Accept: "*/*" }
+        })
         .then(function(res) {
-          console.log(res.response.body.result)
-          if (!res.ok) {
+          console.log(res.body);
+          if (res.body.result === "success") {
+            this.fileList = [];
             this.uploading = false;
-            this.$message.success("upload fial.");
+            this.$message.success("上传成功");
           } else {
             this.fileList = [];
             this.uploading = false;
-            this.$message.success("upload successfully.");
+            this.$message.error(res.body.msg);
           }
         });
     }
