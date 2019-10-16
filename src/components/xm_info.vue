@@ -641,48 +641,7 @@ export default {
       columns_yl: columns_yl,
       columns: columns,
       visible_zxinfo: false,
-      data_yl: [
-        {
-          ylmc: "T3EV1.1-流程用例",
-          scsj: "2019-10-13 20:50:32",
-          zxcs: 55
-        },
-        {
-          ylmc: "T3EV1.1-流程用例",
-          scsj: "2019-10-13 20:50:32",
-          zxcs: 55
-        },
-        {
-          ylmc: "T3EV1.1-流程用例",
-          scsj: "2019-10-13 20:50:32",
-          zxcs: 55
-        },
-        {
-          ylmc: "T3EV1.1-流程用例",
-          scsj: "2019-10-13 20:50:32",
-          zxcs: 55
-        },
-        {
-          ylmc: "T3EV1.1-流程用例",
-          scsj: "2019-10-13 20:50:32",
-          zxcs: 55
-        },
-        {
-          ylmc: "T3EV1.1-流程用例",
-          scsj: "2019-10-13 20:50:32",
-          zxcs: 55
-        },
-        {
-          ylmc: "T3EV1.1-流程用例",
-          scsj: "2019-10-13 20:50:32",
-          zxcs: 55
-        },
-        {
-          ylmc: "T3EV1.1-流程用例",
-          scsj: "2019-10-13 20:50:32",
-          zxcs: 55
-        }
-      ],
+      data_yl: [],
       xmid: "",
       visible_ylgl: false,
       visible_tjfx: false,
@@ -1016,7 +975,10 @@ export default {
             this.$message.error(res.body.msg);
           }
         });
-      this.fetch_ylxx(this.current_yl_list);
+      console.log(this.current_yl_list)
+      setTimeout(() => {
+        this.fetch_ylxx(this.current_yl_list);
+      }, 800);
     }
   }
 };
