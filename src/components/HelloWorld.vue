@@ -1,9 +1,20 @@
 <template>
   <div>
     <div style="float: left;margin-left: 15px;width: 15%;margin-top: 15px;">
-      <a-table :dataSource="data" :columns="columns" :pagination="pagination" :scroll="{ y: 840}" :rowKey="record => record.key">
+      <a-table
+        :dataSource="data"
+        :columns="columns"
+        :loading="loading"
+        :pagination="pagination_xmlist"
+        :scroll="{ y: 840}"
+        :rowKey="record => record.xmbh"
+      >
         <!-- slot-scope 用来绑定record -->
-        <router-link :to="{ path: '/xm_info/' + record.key }" slot="name" slot-scope="text, record">{{text}}</router-link>
+        <router-link
+          :to="{ path: '/xm_info/' + record.xmdz }"
+          slot="name"
+          slot-scope="text, record"
+        >{{text}}</router-link>
         <div
           slot="filterDropdown"
           slot-scope="{ setSelectedKeys, selectedKeys, confirm, clearFilters, column }"
@@ -92,174 +103,20 @@ export default {
   mounted() {
     this.init_fgl();
     this.init_tgl();
+    this.xm_list();
+
   },
   data() {
     return {
-      data: [
-        {
-          key: "qweqweqweqwe",
-          name: "T3C-立案",
-          age: 32,
-          address: "New York No. 1 Lake Park"
-        },
-        {
-          key: "testurl2",
-          name: "T3C-审判",
-          age: 42,
-          address: "London No. 1 Lake Park"
-        },
-        {
-          key: "3",
-          name: "T3C-诉费",
-          age: 32,
-          address: "Sidney No. 1 Lake Park"
-        },
-        {
-          key: "4",
-          name: "节约化执行",
-          age: 32,
-          address: "London No. 2 Lake Park"
-        },
-        {
-          key: "5",
-          name: "John Brown",
-          age: 32,
-          address: "New York No. 1 Lake Park"
-        },
-        {
-          key: "6",
-          name: "Joe Black",
-          age: 42,
-          address: "London No. 1 Lake Park"
-        },
-        {
-          key: "7",
-          name: "Jim Green",
-          age: 32,
-          address: "Sidney No. 1 Lake Park"
-        },
-        {
-          key: "8",
-          name: "Jim Red",
-          age: 32,
-          address: "London No. 2 Lake Park"
-        },
-        {
-          key: "9",
-          name: "Jim Red",
-          age: 32,
-          address: "London No. 2 Lake Park"
-        },
-        {
-          key: "10",
-          name: "John Brown",
-          age: 32,
-          address: "New York No. 1 Lake Park"
-        },
-        {
-          key: "11",
-          name: "Joe Black",
-          age: 42,
-          address: "London No. 1 Lake Park"
-        },
-        {
-          key: "12",
-          name: "Jim Green",
-          age: 32,
-          address: "Sidney No. 1 Lake Park"
-        },
-        {
-          key: "13",
-          name: "Jim Red",
-          age: 32,
-          address: "London No. 2 Lake Park"
-        },
-        {
-          key: "14",
-          name: "John Brown",
-          age: 32,
-          address: "New York No. 1 Lake Park"
-        },
-        {
-          key: "15",
-          name: "Joe Black",
-          age: 42,
-          address: "London No. 1 Lake Park"
-        },
-        {
-          key: "16",
-          name: "Jim Green",
-          age: 32,
-          address: "Sidney No. 1 Lake Park"
-        },
-        {
-          key: "17",
-          name: "Jim Red",
-          age: 32,
-          address: "London No. 2 Lake Park"
-        },
-        {
-          key: "18",
-          name: "John Brown",
-          age: 32,
-          address: "New York No. 1 Lake Park"
-        },
-        {
-          key: "19",
-          name: "Joe Black",
-          age: 42,
-          address: "London No. 1 Lake Park"
-        },
-        {
-          key: "20",
-          name: "Jim Green",
-          age: 32,
-          address: "Sidney No. 1 Lake Park"
-        },
-        {
-          key: "21",
-          name: "Jim Red",
-          age: 32,
-          address: "London No. 2 Lake Park"
-        },
-        {
-          key: "22",
-          name: "Jim Red",
-          age: 32,
-          address: "London No. 2 Lake Park"
-        },
-        {
-          key: "23",
-          name: "John Brown",
-          age: 32,
-          address: "New York No. 1 Lake Park"
-        },
-        {
-          key: "24",
-          name: "Joe Black",
-          age: 42,
-          address: "London No. 1 Lake Park"
-        },
-        {
-          key: "25",
-          name: "Jim Green",
-          age: 32,
-          address: "Sidney No. 1 Lake Park"
-        },
-        {
-          key: "26",
-          name: "Jim Red",
-          age: 32,
-          address: "London No. 2 Lake Park"
-        }
-      ],
+      data: [],
+      loading: false,
       searchText: "",
       searchInput: null,
       columns: [
         {
           title: "项目名称",
-          dataIndex: "name",
-          key: "name",
+          dataIndex: "xmmc",
+          key: "xmmc",
           align: "center",
           width: "200",
           scopedSlots: {
@@ -268,7 +125,7 @@ export default {
             customRender: "name"
           },
           onFilter: (value, record) =>
-            record.name.toLowerCase().includes(value.toLowerCase()),
+            record.xmmc.toLowerCase().includes(value.toLowerCase()),
           onFilterDropdownVisibleChange: visible => {
             if (visible) {
               setTimeout(() => {
@@ -388,6 +245,10 @@ export default {
           time: "2019-10-10 13:55:22"
         }
       ],
+      pagination_xmlist: {
+        hideOnSinglePage: true,
+        defaultPageSize: 500
+      },
       pagination: {
         hideOnSinglePage: true,
         defaultPageSize: 500
@@ -419,6 +280,16 @@ export default {
     };
   },
   methods: {
+    xm_list() {
+      this.loading = true;
+      this.$http
+        .get("http://localhost:8585/project_list")
+        .then(function(response) {
+          this.data = response.body.reslist;
+          this.pagination_xmlist.defaultPageSize = response.body.maxsize;
+        });
+      this.loading = false;
+    },
     handleSearch(selectedKeys, confirm) {
       confirm();
       this.searchText = selectedKeys[0];

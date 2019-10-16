@@ -28,16 +28,16 @@
               style="margin-left: 20px"
             >{{uploading ? '正在上传' : '上传' }}</a-button>
           </div>
-          <div>
+          <div style="margin-top: 80px">
             <a-table
               :columns="columns_yl"
-              :rowKey="record => record.zxbh"
+              :rowKey="record => record.ylbh"
               :dataSource="data_yl"
-              :pagination="pagination"
-              :loading="loading"
+              :pagination="pagination_zx_list"
+              :loading="loading_yl_list"
               size="middle"
               @change="handleTableChange_ylxx"
-              style="margin-left: 30px;margin-right: 30px;margin-top: 15px"
+              style="margin-left: 30px;margin-right: 30px;"
             >
               <H3 slot="title">用例列表</H3>
               <span slot="action_yl" slot-scope="record">
@@ -169,7 +169,7 @@
         :rowKey="record => record.zxbh"
         :dataSource="data.reslist"
         :pagination="pagination"
-        :loading="loading"
+        :loading="loading_list"
         @change="handleTableChange_zxxx"
         style="margin-left: 30px;margin-right: 30px;"
       >
@@ -391,12 +391,15 @@ const innerData_zxinfo = [
 
 export default {
   mounted() {
-    this.xmid = "testurl2";
+    this.xmid = this.$route.params.xmid; 
+    //获取首页传递过来的项目地址，并赋值给当前页面，之后页面相关查询以该参数为主
+    //实际应该拿主键过来，但是因为主键生成的地址不好看 (=^ ^=)，所以使用了项目地址，项目地址在数据库中不可重复，否则会造成页面混乱或者报错
     this.fetch(1);
   },
   data() {
     return {
       target_key: "1",
+      current_ylzx: "1",
       data_char_cgl: data_char_cgl,
       columns_zxinfo: columns_zxinfo,
       innerColumns_zxinfo: innerColumns_zxinfo,
@@ -691,9 +694,18 @@ export default {
       pagination: {
         defaultPageSize: 10,
         total: null,
-        showQuickJumper: true
+        showQuickJumper: true,
+        position: 'bottom'
       },
-      loading: false
+      pagination_zx_list: {
+        defaultPageSize: 8,
+        total: null,
+        showQuickJumper: true,
+        position: 'bottom'
+      },
+      loading: false,
+      loading_list: false,
+      loading_yl_list: false
     };
   },
   methods: {
@@ -722,7 +734,8 @@ export default {
       this.uploading = false;
     },
     fetch(pagenum) {
-      this.loading = true;
+      this.loading_list = true;
+      console.log(this.loading_list)
       this.$http
         .get("http://localhost:8585/" + this.xmid + "/zx_list/" + pagenum)
         .then(function(response) {
@@ -735,27 +748,27 @@ export default {
           }
           this.data = response.body;
           this.pagination.total = response.body.maxsize;
-          this.current = 1;
+          this.current_ylzx = 1; //用例执行记录的页码
         });
-      this.loading = false;
+      this.loading_list = false;
     },
     fetch_ylxx(pagenum) {
-      this.loading = true;
+      this.loading_yl_list = true;
       this.$http
-        .get("http://localhost:8585/" + this.xmid + "/zx_list/" + pagenum)
+        .get("http://localhost:8585/" + this.xmid + "/yl_list/" + pagenum)
         .then(function(response) {
           var time = {};
           for (time in response.body.reslist) {
             // console.log(response.body.reslist[time].zxsj)
-            response.body.reslist[time].zxsj = this.getdate(
-              response.body.reslist[time].zxsj
+            response.body.reslist[time].scsj = this.getdate(
+              response.body.reslist[time].scsj
             );
           }
-          this.data = response.body;
-          this.pagination.total = response.body.maxsize;
-          this.current = 1;
+          this.data_yl = response.body.reslist;
+          this.pagination_zx_list.total = response.body.maxsize;
+          this.current_yl_list = response.body.nowpage;
         });
-      this.loading = false;
+      this.loading_yl_list = false;
     },
     hhh() {
       alert("hhhhh");
@@ -1003,6 +1016,7 @@ export default {
             this.$message.error(res.body.msg);
           }
         });
+      this.fetch_ylxx(this.current_yl_list);
     }
   }
 };
