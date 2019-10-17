@@ -661,7 +661,8 @@ export default {
         defaultPageSize: 8,
         total: null,
         showQuickJumper: true,
-        position: 'bottom'
+        position: 'bottom',
+        current: 1,
       },
       loading: false,
       loading_list: false,
@@ -695,17 +696,16 @@ export default {
     },
     fetch(pagenum) {
       this.loading_list = true;
-      console.log(this.loading_list)
       this.$http
         .get("http://localhost:8585/" + this.xmid + "/zx_list/" + pagenum)
         .then(function(response) {
-          var time = {};
-          for (time in response.body.reslist) {
-            // console.log(response.body.reslist[time].zxsj)
-            response.body.reslist[time].zxsj = this.getdate(
-              response.body.reslist[time].zxsj
-            );
-          }
+          // var time = {};
+          // for (time in response.body.reslist) {
+          //   // console.log(response.body.reslist[time].zxsj)
+          //   response.body.reslist[time].zxsj = this.getdate(
+          //     response.body.reslist[time].zxsj
+          //   );
+          // }
           this.data = response.body;
           this.pagination.total = response.body.maxsize;
           this.current_ylzx = 1; //用例执行记录的页码
@@ -717,16 +717,16 @@ export default {
       this.$http
         .get("http://localhost:8585/" + this.xmid + "/yl_list/" + pagenum)
         .then(function(response) {
-          var time = {};
-          for (time in response.body.reslist) {
-            // console.log(response.body.reslist[time].zxsj)
-            response.body.reslist[time].scsj = this.getdate(
-              response.body.reslist[time].scsj
-            );
-          }
+          // var time = {};
+          // for (time in response.body.reslist) {
+          //   // console.log(response.body.reslist[time].zxsj)
+          //   // response.body.reslist[time].scsj = this.getdate(
+          //   //   response.body.reslist[time].scsj
+          //   // );
+          // }
           this.data_yl = response.body.reslist;
           this.pagination_zx_list.total = response.body.maxsize;
-          this.current_yl_list = response.body.nowpage;
+          this.pagination_zx_list.current = response.body.nowpage;
         });
       this.loading_yl_list = false;
     },
@@ -745,7 +745,6 @@ export default {
             this.$message.success("执行成功");
           } else {
             this.loading_runcanse = false;
-            console.log(res.body)
             this.$message.error(res.body.msg);
           }
         });
@@ -757,30 +756,11 @@ export default {
       setTimeout(() => {
         this.init_char_cgl(), this.init_char_tgl(), this.init_char_xysj();
       }, 500);
-      // this.init_char_cgl();
     },
     click_del(key) {
       alert("delkey:" + key);
     },
-    getdate(time) {
-      var date = new Date(time);
-      var y = date.getFullYear();
-      var m = date.getMonth() + 1;
-      m = m < 10 ? "0" + m : m;
-      var d = date.getDate();
-      d = d < 10 ? "0" + d : d;
-      var h = date.getHours();
-      h = h < 10 ? "0" + h : h;
-      var minute = date.getMinutes();
-      var second = date.getSeconds();
-      minute = minute < 10 ? "0" + minute : minute;
-      second = second < 10 ? "0" + second : second;
-      return (
-        y + "-" + m + "-" + d + " " + "　" + h + ":" + minute + ":" + second
-      );
-    },
     init_char_cgl() {
-      console.log("++++++++++++++++++++++");
       var chart = new G2.Chart({
         container: "char_cgl",
         // forceFit: true,
@@ -837,7 +817,6 @@ export default {
       interval.setSelected(data_char_cgl[0]);
     },
     init_char_tgl() {
-      console.log("++++++++++++++++++++++");
       var chart = new G2.Chart({
         container: "char_tgl",
         // forceFit: true,
@@ -955,7 +934,6 @@ export default {
     },
     handleSizeChange(e) {
       this.target_key = e.target.value;
-      console.log(e.target.value);
     },
     handleRemove(file) {
       const index = this.fileList.indexOf(file);
@@ -980,7 +958,6 @@ export default {
           headers: { "Content-Type": "multipart/form-data", Accept: "*/*" }
         })
         .then(function(res) {
-          console.log(res.body);
           if (res.body.result === "success") {
             this.fileList = [];
             this.uploading = false;
@@ -991,10 +968,10 @@ export default {
             this.$message.error(res.body.msg);
           }
         });
-      console.log(this.current_yl_list)
       setTimeout(() => {
-        this.fetch_ylxx(this.current_yl_list);
-      }, 800);
+        this.fetch_ylxx(1);
+        this.pagination_zx_list.current = 1
+      }, 400);
     }
   }
 };
