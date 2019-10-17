@@ -41,7 +41,7 @@
             >
               <H3 slot="title">用例列表</H3>
               <span slot="action_yl" slot-scope="record">
-                <a-button type="primary" :loading="loading" @click="click_info(record.ylmc)">执行</a-button>
+                <a-button type="primary" :loading="loading_runcanse" @click="click_info(record.ylbh)">执行</a-button>
                 <a-divider type="vertical" />
                 <a-button type="primary" :loading="loading" @click="click_del(record.scsj)">下载</a-button>
                 <a-divider type="vertical" />
@@ -398,6 +398,7 @@ export default {
   },
   data() {
     return {
+      loading_runcanse: false,
       target_key: "1",
       current_ylzx: "1",
       data_char_cgl: data_char_cgl,
@@ -733,7 +734,22 @@ export default {
       alert("hhhhh");
     },
     click_info(key) {
-      alert("infokey:" + key);
+        this.loading_runcanse = true;
+        this.$http
+        .post("http://localhost:8585/runcase", {ylbh: key}, {
+          headers: { "Content-Type": "application/json", Accept: "*/*" }
+        })
+        .then(function(res) {
+          if (res.body.result === "success") {
+            this.loading_runcanse = false;
+            this.$message.success("执行成功");
+          } else {
+            this.loading_runcanse = false;
+            console.log(res.body)
+            this.$message.error(res.body.msg);
+          }
+        });
+
     },
     click_zxinfo(key) {
       this.visible_zxinfo = true;
