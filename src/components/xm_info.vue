@@ -33,7 +33,7 @@
               :columns="columns_yl"
               :rowKey="record => record.ylbh"
               :dataSource="data_yl"
-              :pagination="pagination_zx_list"
+              :pagination="pagination_yl_list"
               :loading="loading_yl_list"
               size="middle"
               @change="handleTableChange_ylxx"
@@ -168,7 +168,7 @@
         :columns="columns"
         :rowKey="record => record.zxbh"
         :dataSource="data.reslist"
-        :pagination="pagination"
+        :pagination="pagination_zx_list"
         :loading="loading_list"
         @change="handleTableChange_zxxx"
         style="margin-left: 30px;margin-right: 30px;"
@@ -400,7 +400,6 @@ export default {
     return {
       loading_runcanse: false,
       target_key: "1",
-      current_ylzx: "1",
       data_char_cgl: data_char_cgl,
       columns_zxinfo: columns_zxinfo,
       innerColumns_zxinfo: innerColumns_zxinfo,
@@ -651,13 +650,14 @@ export default {
       uploading: false,
       placement: "top",
       placement_ylsc: "bottom",
-      pagination: {
+      pagination_zx_list: {
         defaultPageSize: 10,
         total: null,
         showQuickJumper: true,
-        position: 'bottom'
+        position: 'bottom',
+        current: 1
       },
-      pagination_zx_list: {
+      pagination_yl_list: {
         defaultPageSize: 8,
         total: null,
         showQuickJumper: true,
@@ -699,16 +699,9 @@ export default {
       this.$http
         .get("http://localhost:8585/" + this.xmid + "/zx_list/" + pagenum)
         .then(function(response) {
-          // var time = {};
-          // for (time in response.body.reslist) {
-          //   // console.log(response.body.reslist[time].zxsj)
-          //   response.body.reslist[time].zxsj = this.getdate(
-          //     response.body.reslist[time].zxsj
-          //   );
-          // }
           this.data = response.body;
-          this.pagination.total = response.body.maxsize;
-          this.current_ylzx = 1; //用例执行记录的页码
+          this.pagination_zx_list.total = response.body.maxsize;
+          this.pagination_zx_list.current = pagenum; //用例执行记录的页码
         });
       this.loading_list = false;
     },
@@ -725,15 +718,15 @@ export default {
           //   // );
           // }
           this.data_yl = response.body.reslist;
-          this.pagination_zx_list.total = response.body.maxsize;
-          this.pagination_zx_list.current = response.body.nowpage;
+          this.pagination_yl_list.total = response.body.maxsize;
+          this.pagination_yl_list.current = response.body.nowpage;
         });
       this.loading_yl_list = false;
     },
     hhh() {
       alert("hhhhh");
     },
-    click_info(key) {
+    click_info(key) { // 执行用例时的方法
         this.loading_runcanse = true;
         this.$http
         .post("http://localhost:8585/runcase", {ylbh: key}, {
@@ -748,6 +741,11 @@ export default {
             this.$message.error(res.body.msg);
           }
         });
+        // 刷新用例列表，更新用例执行记录列表
+        setTimeout(() => {
+        this.fetch_ylxx(this.pagination_yl_list.current);
+        this.fetch(1)
+      }, 800);
 
     },
     click_zxinfo(key) {
@@ -970,7 +968,7 @@ export default {
         });
       setTimeout(() => {
         this.fetch_ylxx(1);
-        this.pagination_zx_list.current = 1
+        this.pagination_yl_list.current = 1
       }, 400);
     }
   }
