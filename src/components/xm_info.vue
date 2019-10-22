@@ -103,7 +103,7 @@
             :columns="columns_zxinfo"
             :dataSource="data_zxinfo"
             class="components-table-demo-nested"
-            :scroll="{y:700}"
+            :scroll="{y:670}"
             size="middle"
             style="margin-left:5px;margin-right:5px;"
           >
