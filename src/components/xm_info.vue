@@ -41,7 +41,11 @@
             >
               <H3 slot="title">用例列表</H3>
               <span slot="action_yl" slot-scope="record">
-                <a-button type="primary" :loading="loading_runcanse" @click="click_info(record.ylbh)">执行</a-button>
+                <a-button
+                  type="primary"
+                  :loading="loading_runcanse"
+                  @click="click_info(record.ylbh)"
+                >执行</a-button>
                 <a-divider type="vertical" />
                 <a-button type="primary" :loading="loading" @click="click_del(record.scsj)">下载</a-button>
                 <a-divider type="vertical" />
@@ -82,6 +86,7 @@
         :destroyOnClose="true"
         height="900"
       >
+      <a-spin :spinning="spinning" :delay="delayTime" tip="···用例仍在执行中，请保持冷静，页面会自动检查用例执行情况···">
         <div style="float: left;width: 24%;">
           <div id="char_xysj" style="float: left;"></div>
           <div id="char_cgl" style="float: left;"></div>
@@ -106,17 +111,23 @@
             :scroll="{y:670}"
             size="middle"
             style="margin-left:5px;margin-right:5px;"
+            :pagination="placement_zxinfo"
+            :loading="loading_zxinfo"
+            @change="handleTableChange_zxinfo"
           >
             <a-table
               slot="expandedRowRender"
+              slot-scope="record"
               :columns="innerColumns_zxinfo"
-              :dataSource="innerData_zxinfo"
+              :dataSource="record.innerlist"
+              :rowKey="record => record.key"
               :pagination="false"
               size="small"
               style="margin-left: 15px;margin-right: 15px"
             ></a-table>
           </a-table>
         </div>
+        </a-spin>
       </a-drawer>
     </div>
 
@@ -303,95 +314,71 @@ const columns_zxinfo = [
   },
   {
     title: "地址",
-    dataIndex: "platform",
-    key: "platform",
+    dataIndex: "url",
+    key: "url",
     align: "center",
     width: 300
   },
   {
     title: "响应时间",
-    dataIndex: "version",
-    key: "version",
+    dataIndex: "xysj",
+    key: "xysj",
     align: "center",
     width: 200
   },
   {
     title: "执行时间",
-    dataIndex: "upgradeNum",
-    key: "upgradeNum",
+    dataIndex: "zxsj",
+    key: "zxsj",
     align: "center",
     width: 100
   },
   {
     title: "接口状态",
-    dataIndex: "creator",
-    key: "creator",
+    dataIndex: "jkzt",
+    key: "jkzt",
     align: "center",
     width: 100
   },
   {
     title: "验证结果",
-    dataIndex: "createdAt",
-    key: "createdAt",
+    dataIndex: "yzjg",
+    key: "yzjg",
     align: "center",
     width: 200
   }
 ];
 
-const data_zxinfo = [];
-for (let i = 0; i < 10; ++i) {
-  data_zxinfo.push({
-    key: i,
-    name: "案件签收",
-    platform: "/zx/ajqs",
-    version: "355ms",
-    upgradeNum: "2014-12-24 23:12:00",
-    creator: "200",
-    createdAt: "通过"
-  });
-}
-
 const innerColumns_zxinfo = [
   {
     title: "参数",
-    dataIndex: "date",
-    key: "date",
+    dataIndex: "cs",
+    key: "cs",
     align: "center",
     width: 400
   },
   {
     title: "预期返回值",
-    dataIndex: "name",
-    key: "name",
+    dataIndex: "yqfhz",
+    key: "yqfhz",
     align: "center",
     width: 400
   },
   {
     title: "实际返回值",
-    dataIndex: "upgradeNum",
-    key: "upgradeNum",
+    dataIndex: "sjfhz",
+    key: "sjfhz",
     align: "center",
     width: 400
   }
 ];
 
-const innerData_zxinfo = [
-  {
-    key: 1,
-    date:
-      "{'name': '张三', 'para': '35.65','name': '张三', 'para': '35.65','name': '张三', 'para': '35.65','name': '张三', 'para': '35.65'}",
-    name:
-      "{'name': '张三', 'para': '35.65','name': '张三', 'para': '35.65','name': '张三', 'para': '35.65','name': '张三', 'para': '35.65'}",
-    upgradeNum:
-      "{'name': '张三', 'para': '35.65','name': '张三', 'para': '35.65','name': '张三', 'para': '35.65','name': '张三', 'para': '35.65'}"
-  }
-];
 
 // =================================
 
 export default {
   mounted() {
-    this.xmid = this.$route.params.xmid; 
+    this.xmid = this.$route.params.xmid;
     //获取首页传递过来的项目地址，并赋值给当前页面，之后页面相关查询以该参数为主
     //实际应该拿主键过来，但是因为主键生成的地址不好看 (=^ ^=)，所以使用了项目地址，项目地址在数据库中不可重复，否则会造成页面混乱或者报错
     this.fetch(1);
@@ -403,8 +390,8 @@ export default {
       data_char_cgl: data_char_cgl,
       columns_zxinfo: columns_zxinfo,
       innerColumns_zxinfo: innerColumns_zxinfo,
-      data_zxinfo: data_zxinfo,
-      innerData_zxinfo: innerData_zxinfo,
+      data_zxinfo: [],
+      innerData_zxinfo: [],
       char_xysj: [
         {
           date: "接口111",
@@ -654,19 +641,30 @@ export default {
         defaultPageSize: 10,
         total: null,
         showQuickJumper: true,
-        position: 'bottom',
+        position: "bottom",
         current: 1
       },
       pagination_yl_list: {
         defaultPageSize: 8,
         total: null,
         showQuickJumper: true,
-        position: 'bottom',
-        current: 1,
+        position: "bottom",
+        current: 1
+      },
+      placement_zxinfo: {
+        defaultPageSize: 10,
+        total: null,
+        showQuickJumper: true,
+        position: "bottom",
+        current: 1
       },
       loading: false,
       loading_list: false,
-      loading_yl_list: false
+      loading_yl_list: false,
+      loading_zxinfo: false,
+      spinning: false,
+      delayTime: 50,
+      zxid: ''  // 记录当前打开的用例执行id
     };
   },
   methods: {
@@ -675,6 +673,9 @@ export default {
     },
     handleTableChange_ylxx(pageNumber) {
       this.fetch_ylxx(pageNumber.current);
+    },
+    handleTableChange_zxinfo(pageNumber) {
+      this.fetch_ylzxinfo(pageNumber.current);
     },
     showDrawer_ylgl() {
       this.fetch_ylxx(1);
@@ -693,6 +694,11 @@ export default {
       this.visible_ylsc = false;
       this.fileList = [];
       this.uploading = false;
+      this.data_zxinfo = [];
+      this.innerData_zxinfo = [];
+      this.target_key = '1';
+      this.placement_zxinfo.current = 1;
+      this.zxid = '';
     },
     fetch(pagenum) {
       this.loading_list = true;
@@ -723,34 +729,64 @@ export default {
         });
       this.loading_yl_list = false;
     },
+    fetch_ylzxinfo(pagenum) {
+      //执行信息的详情获取
+      this.loading_zxinfo = true;
+      // this.spinning = true;
+      this.$http
+        .get("http://localhost:8585/ylzx_info/" + this.zxid + "/" + pagenum, {
+          params: { zt: this.target_key }
+        })
+        .then(function(response) {
+          this.data_zxinfo = response.body.reslist;
+          this.placement_zxinfo.total = response.body.maxsize;
+          this.placement_zxinfo.current = pagenum;
+          if (response.body.zt === "0") {
+            setTimeout(() => {
+              this.fetch_ylzxinfo(pagenum);
+            }, 2000);
+          } else {
+            this.spinning = false
+          }
+        });
+      this.loading_zxinfo = false;
+    },
     hhh() {
       alert("hhhhh");
     },
-    click_info(key) { // 执行用例时的方法
-        this.loading_runcanse = true;
-        this.$http
-        .post("http://localhost:8585/runcase", {ylbh: key}, {
-          headers: { "Content-Type": "application/json", Accept: "*/*" }
-        })
+    click_info(key) {
+      // 执行用例时的方法
+      this.loading_runcanse = true;
+      this.$http
+        .post(
+          "http://localhost:8585/runcase",
+          { ylbh: key },
+          {
+            headers: { "Content-Type": "application/json", Accept: "*/*" }
+          }
+        )
         .then(function(res) {
           if (res.body.result === "success") {
             this.loading_runcanse = false;
-            this.$message.success("执行成功");
+            // this.$message.success("执行成功");
+            this.visible_ylgl = false;
+            this.click_zxinfo(res.body.zxid);
           } else {
             this.loading_runcanse = false;
             this.$message.error(res.body.msg);
           }
         });
-        // 刷新用例列表，更新用例执行记录列表
-        setTimeout(() => {
+      // 刷新用例列表，更新用例执行记录列表
+      setTimeout(() => {
         this.fetch_ylxx(this.pagination_yl_list.current);
-        this.fetch(1)
+        this.fetch(1);
       }, 800);
-
     },
     click_zxinfo(key) {
       this.visible_zxinfo = true;
-      this.target_key = "1";
+      this.spinning = true;
+      this.zxid = key
+      this.fetch_ylzxinfo(this.placement_zxinfo.current);
       setTimeout(() => {
         this.init_char_cgl(), this.init_char_tgl(), this.init_char_xysj();
       }, 500);
@@ -968,9 +1004,19 @@ export default {
         });
       setTimeout(() => {
         this.fetch_ylxx(1);
-        this.pagination_yl_list.current = 1
+        this.pagination_yl_list.current = 1;
       }, 400);
     }
   }
 };
 </script>
+
+
+
+<style scoped>
+  .spin-content {
+    border: 1px solid #91d5ff;
+    background-color: #e6f7ff;
+    padding: 30px;
+  }
+</style>
