@@ -141,12 +141,12 @@
         @close="onClose"
         :visible="visible_ylsc"
         :destroyOnClose="true"
-        height="600"
+        width="600"
       >
         <div>
-          <a-input placeholder="请输入swagger地址" style="margin-top: 20px" />
-          <a-input placeholder="如有需要，请输入cookie" style="margin-top: 20px" />
-          <a-button type="primary" style="margin-top: 20px">生成用例</a-button>
+          <a-input v-model="url" placeholder="请输入swagger地址" style="margin-top: 20px;text-align:center" />
+          <a-input v-model="cookie" placeholder="如有需要，请输入cookie" style="margin-top: 20px;text-align:center" />
+          <a-button type="primary" style="margin-top: 20px;margin-left: 240px" :loading="loading_makecase" @click=casemake>生成用例</a-button>
         </div>
       </a-drawer>
     </div>
@@ -375,7 +375,7 @@ const innerColumns_zxinfo = [
 
 
 // =================================
-
+var fileDownload = require("js-file-download");
 export default {
   mounted() {
     this.xmid = this.$route.params.xmid;
@@ -385,7 +385,10 @@ export default {
   },
   data() {
     return {
+      url: '',
+      cookie: '',
       loading_runcanse: false,
+      loading_makecase: false,
       target_key: "1",
       data_char_cgl: data_char_cgl,
       columns_zxinfo: columns_zxinfo,
@@ -636,7 +639,7 @@ export default {
       fileList: [],
       uploading: false,
       placement: "top",
-      placement_ylsc: "bottom",
+      placement_ylsc: "right",
       pagination_zx_list: {
         defaultPageSize: 10,
         total: null,
@@ -1006,6 +1009,24 @@ export default {
         this.fetch_ylxx(1);
         this.pagination_yl_list.current = 1;
       }, 400);
+    },
+    casemake() {
+      this.loading_makecase = true;
+      this.$http
+        .post(
+          "http://localhost:8585/makecase",
+          { url: this.url, cookie: this.cookie },
+          {
+            headers: { "Content-Type": "application/json", Accept: "*/*" }
+          }
+        )
+        .then(function(response) {
+            this.loading_makecase = false;
+            fileDownload(response.data,'1111.xlsx');
+          }, function(response){
+            this.loading_makecase = false;
+          }
+        );
     }
   }
 };
