@@ -375,7 +375,7 @@ const innerColumns_zxinfo = [
 
 
 // =================================
-var fileDownload = require("js-file-download");
+// var fileDownload = require("js-file-download");
 export default {
   mounted() {
     this.xmid = this.$route.params.xmid;
@@ -385,8 +385,8 @@ export default {
   },
   data() {
     return {
-      url: '',
-      cookie: '',
+      url: 'http://172.18.12.118:9070/t3e-jyhzx/v2/api-docs',
+      cookie: 'userToken=eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJtc3AtZ2F0ZXdheSIsInVzZXJJZCI6IjEwMDI3MDEwIiwiaXAiOiIxNzIuMTguNDkuMTgiLCJleHBEYXRlIjoxNTcyMDE3NjQxMjE3LCJ0Z3QiOiJUR1QtMzE4My1vMkwwYVJzc3NFczdZaE03ZWVmQTNBYVl6aUVmZnVnSUVOS2hBZTlpRlFOU1dvMmZvRS1jYXMiLCJzdCI6IlNULTIzMDI0LXZLVkYwVWFGMlN5R2JYamRkemZSLWNhcyIsImlhdCI6MTU3MTk4ODg0MX0.a43BKoHHtd-3OgLx0rtGsfpjfTIPXImKzN9o4GeOl0NzCPb_-oLI6CWkZx7Jh4cNYxdSibXPzUU-f-v39sZlWw; JSESSIONID=node0zwx5r95ifook2a9mee5o6ldj705.node0',
       loading_runcanse: false,
       loading_makecase: false,
       target_key: "1",
@@ -1017,12 +1017,25 @@ export default {
           "http://localhost:8585/makecase",
           { url: this.url, cookie: this.cookie },
           {
-            headers: { "Content-Type": "application/json", Accept: "*/*" }
-          }
+            headers: { "Content-Type": "application/json" }
+          },
+          {responseType: 'blob'}
         )
         .then(function(response) {
             this.loading_makecase = false;
-            fileDownload(response.data,'1111.xlsx');
+            console.log(response)
+            // fileDownload(response.body,'1111.xlsx');
+            var blob = new Blob([response.bodyText], {type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"});
+            // var blob = new Blob([response.data], {type: 'text/html'});
+            var downloadElement = document.createElement('a');
+            var href = window.URL.createObjectURL(blob); // 创建下载的链接
+            console.log(href);
+            downloadElement.href = href;
+            // downloadElement.download = '123'+'.xlsx'; // 下载后文件名
+            document.body.appendChild(downloadElement);
+            downloadElement.click(); // 点击下载
+            document.body.removeChild(downloadElement); // 下载完成移除元素
+            window.URL.revokeObjectURL(href); // 释放掉blob对象
           }, function(response){
             this.loading_makecase = false;
           }
