@@ -1025,8 +1025,8 @@ export default {
             this.loading_makecase = false;
             console.log(response)
             // fileDownload(response.body,'1111.xlsx');
-            var blob = new Blob([response.bodyText], {type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"});
-            // var blob = new Blob([response.data], {type: 'text/html'});
+            var blob = new Blob([response.body], {type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"});
+            // var blob = new Blob([response.data], {type: 'application/vnd.ms-excel'});
             var downloadElement = document.createElement('a');
             var href = window.URL.createObjectURL(blob); // 创建下载的链接
             console.log(href);
