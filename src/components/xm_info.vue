@@ -1012,34 +1012,46 @@ export default {
     },
     casemake() {
       this.loading_makecase = true;
-      this.$http
-        .post(
-          "http://localhost:8585/makecase",
-          { url: this.url, cookie: this.cookie },
-          {
-            headers: { "Content-Type": "application/json" }
-          },
-          {responseType: 'blob'}
-        )
-        .then(function(response) {
-            this.loading_makecase = false;
-            console.log(response)
-            // fileDownload(response.body,'1111.xlsx');
-            var blob = new Blob([response.body], {type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"});
-            // var blob = new Blob([response.data], {type: 'application/vnd.ms-excel'});
-            var downloadElement = document.createElement('a');
-            var href = window.URL.createObjectURL(blob); // 创建下载的链接
-            console.log(href);
-            downloadElement.href = href;
-            // downloadElement.download = '123'+'.xlsx'; // 下载后文件名
-            document.body.appendChild(downloadElement);
-            downloadElement.click(); // 点击下载
-            document.body.removeChild(downloadElement); // 下载完成移除元素
-            window.URL.revokeObjectURL(href); // 释放掉blob对象
-          }, function(response){
-            this.loading_makecase = false;
-          }
-        );
+      window.open('http://localhost:8585/makecase?' + 'url=' + this.url + '&' + 'cookie=' + this.cookie);
+      this.loading_makecase = false;
+      // this.$http
+      //   .post(
+      //     "http://localhost:8585/makecase",
+      //     { url: this.url, cookie: this.cookie },
+      //     {
+      //       headers: { "Content-Type": "application/json" }
+      //     },
+      //     {responseType: 'arraybuffer'}
+      //   )
+      //   .then(function(response) {
+      //       this.loading_makecase = false;
+      //       console.log(response)
+      //       // // fileDownload(response.body,'1111.xlsx');
+      //       // var blob = new Blob([response.body], {type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"});
+      //       // // var blob = new Blob([response.data], {type: 'application/vnd.ms-excel'});
+      //       // var downloadElement = document.createElement('a');
+      //       // var href = window.URL.createObjectURL(blob); // 创建下载的链接
+      //       // console.log(href);
+      //       // downloadElement.href = href;
+      //       // // downloadElement.download = '123'+'.xlsx'; // 下载后文件名
+      //       // document.body.appendChild(downloadElement);
+      //       // downloadElement.click(); // 点击下载
+      //       // document.body.removeChild(downloadElement); // 下载完成移除元素
+      //       // window.URL.revokeObjectURL(href); // 释放掉blob对象
+      //       let headers = response.headers
+      //       console.log(response.headers)
+      //       let blob = new Blob([response.body], {
+      //       type: headers.map['content-type']
+      //       })
+      //       let link = document.createElement('a')
+      //       link.href = window.URL.createObjectURL(blob)
+      //       // let title = 'xxxx.xlsx'
+      //       // link.download = title
+      //       link.click()
+      //     }, function(response){
+      //       this.loading_makecase = false;
+      //     }
+      //   );
     }
   }
 };
