@@ -47,7 +47,7 @@
                   @click="click_info(record.ylbh)"
                 >执行</a-button>
                 <a-divider type="vertical" />
-                <a-button type="primary" :loading="loading" @click="click_del(record.scsj)">下载</a-button>
+                <a-button type="primary" :loading="loading" @click="click_dl_case(record.ylbh)">下载</a-button>
                 <a-divider type="vertical" />
                 <a-button type="primary" :loading="loading" @click="click_del(record.zxcs)">删除</a-button>
               </span>
@@ -86,47 +86,47 @@
         :destroyOnClose="true"
         height="900"
       >
-      <a-spin :spinning="spinning" :delay="delayTime" tip="···用例仍在执行中，请保持冷静，页面会自动检查用例执行情况···">
-        <div style="float: left;width: 24%;">
-          <div id="char_xysj" style="float: left;"></div>
-          <div id="char_cgl" style="float: left;"></div>
-          <div id="char_tgl" style="float: left;"></div>
-        </div>
-        <div style="float: right;width: 75%;">
-          <a-radio-group
-            :value="target_key"
-            @change="handleSizeChange"
-            style="margin-left:5px;margin-right:5px;margin-top: 5px;margin-bottom: 5px"
-          >
-            <a-radio-button value="1">全部</a-radio-button>
-            <a-radio-button value="2">请求成功</a-radio-button>
-            <a-radio-button value="3">请求失败</a-radio-button>
-            <a-radio-button value="4">验证通过</a-radio-button>
-            <a-radio-button value="5">验证失败</a-radio-button>
-          </a-radio-group>
-          <a-table
-            :columns="columns_zxinfo"
-            :dataSource="data_zxinfo"
-            class="components-table-demo-nested"
-            :scroll="{y:670}"
-            size="middle"
-            style="margin-left:5px;margin-right:5px;"
-            :pagination="placement_zxinfo"
-            :loading="loading_zxinfo"
-            @change="handleTableChange_zxinfo"
-          >
+        <a-spin :spinning="spinning" :delay="delayTime" tip="···用例仍在执行中，请保持冷静，页面会自动检查用例执行情况···">
+          <div style="float: left;width: 24%;">
+            <div id="char_xysj" style="float: left;"></div>
+            <div id="char_cgl" style="float: left;"></div>
+            <div id="char_tgl" style="float: left;"></div>
+          </div>
+          <div style="float: right;width: 75%;">
+            <a-radio-group
+              :value="target_key"
+              @change="handleSizeChange"
+              style="margin-left:5px;margin-right:5px;margin-top: 5px;margin-bottom: 5px"
+            >
+              <a-radio-button value="1">全部</a-radio-button>
+              <a-radio-button value="2">请求成功</a-radio-button>
+              <a-radio-button value="3">请求失败</a-radio-button>
+              <a-radio-button value="4">验证通过</a-radio-button>
+              <a-radio-button value="5">验证失败</a-radio-button>
+            </a-radio-group>
             <a-table
-              slot="expandedRowRender"
-              slot-scope="record"
-              :columns="innerColumns_zxinfo"
-              :dataSource="record.innerlist"
-              :rowKey="record => record.key"
-              :pagination="false"
-              size="small"
-              style="margin-left: 15px;margin-right: 15px"
-            ></a-table>
-          </a-table>
-        </div>
+              :columns="columns_zxinfo"
+              :dataSource="data_zxinfo"
+              class="components-table-demo-nested"
+              :scroll="{y:670}"
+              size="middle"
+              style="margin-left:5px;margin-right:5px;"
+              :pagination="placement_zxinfo"
+              :loading="loading_zxinfo"
+              @change="handleTableChange_zxinfo"
+            >
+              <a-table
+                slot="expandedRowRender"
+                slot-scope="record"
+                :columns="innerColumns_zxinfo"
+                :dataSource="record.innerlist"
+                :rowKey="record => record.key"
+                :pagination="false"
+                size="small"
+                style="margin-left: 15px;margin-right: 15px"
+              ></a-table>
+            </a-table>
+          </div>
         </a-spin>
       </a-drawer>
     </div>
@@ -144,9 +144,22 @@
         width="600"
       >
         <div>
-          <a-input v-model="url" placeholder="请输入swagger地址" style="margin-top: 20px;text-align:center" />
-          <a-input v-model="cookie" placeholder="如有需要，请输入cookie" style="margin-top: 20px;text-align:center" />
-          <a-button type="primary" style="margin-top: 20px;margin-left: 240px" :loading="loading_makecase" @click=casemake>生成用例</a-button>
+          <a-input
+            v-model="url"
+            placeholder="请输入swagger地址"
+            style="margin-top: 20px;text-align:center"
+          />
+          <a-input
+            v-model="cookie"
+            placeholder="如有需要，请输入cookie"
+            style="margin-top: 20px;text-align:center"
+          />
+          <a-button
+            type="primary"
+            style="margin-top: 20px;margin-left: 240px"
+            :loading="loading_makecase"
+            @click="casemake"
+          >生成用例</a-button>
         </div>
       </a-drawer>
     </div>
@@ -199,6 +212,7 @@
 
 <script>
 import G2 from "@antv/g2";
+import axios from "axios";
 const columns = [
   {
     title: "名称",
@@ -373,7 +387,6 @@ const innerColumns_zxinfo = [
   }
 ];
 
-
 // =================================
 // var fileDownload = require("js-file-download");
 export default {
@@ -385,8 +398,8 @@ export default {
   },
   data() {
     return {
-      url: 'http://172.18.12.118:9070/t3e-jyhzx/v2/api-docs',
-      cookie: 'userToken=eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJtc3AtZ2F0ZXdheSIsInVzZXJJZCI6IjEwMDI3MDEwIiwiaXAiOiIxNzIuMTguNDkuMTgiLCJleHBEYXRlIjoxNTcyMDE3NjQxMjE3LCJ0Z3QiOiJUR1QtMzE4My1vMkwwYVJzc3NFczdZaE03ZWVmQTNBYVl6aUVmZnVnSUVOS2hBZTlpRlFOU1dvMmZvRS1jYXMiLCJzdCI6IlNULTIzMDI0LXZLVkYwVWFGMlN5R2JYamRkemZSLWNhcyIsImlhdCI6MTU3MTk4ODg0MX0.a43BKoHHtd-3OgLx0rtGsfpjfTIPXImKzN9o4GeOl0NzCPb_-oLI6CWkZx7Jh4cNYxdSibXPzUU-f-v39sZlWw; JSESSIONID=node0zwx5r95ifook2a9mee5o6ldj705.node0',
+      url: "",
+      cookie: "",
       loading_runcanse: false,
       loading_makecase: false,
       target_key: "1",
@@ -667,7 +680,7 @@ export default {
       loading_zxinfo: false,
       spinning: false,
       delayTime: 50,
-      zxid: ''  // 记录当前打开的用例执行id
+      zxid: "" // 记录当前打开的用例执行id
     };
   },
   methods: {
@@ -699,14 +712,14 @@ export default {
       this.uploading = false;
       this.data_zxinfo = [];
       this.innerData_zxinfo = [];
-      this.target_key = '1';
+      this.target_key = "1";
       this.placement_zxinfo.current = 1;
-      this.zxid = '';
+      this.zxid = "";
     },
     fetch(pagenum) {
       this.loading_list = true;
       this.$http
-        .get("http://localhost:8585/" + this.xmid + "/zx_list/" + pagenum)
+        .get("http://172.18.49.18:8585/" + this.xmid + "/zx_list/" + pagenum)
         .then(function(response) {
           this.data = response.body;
           this.pagination_zx_list.total = response.body.maxsize;
@@ -717,7 +730,7 @@ export default {
     fetch_ylxx(pagenum) {
       this.loading_yl_list = true;
       this.$http
-        .get("http://localhost:8585/" + this.xmid + "/yl_list/" + pagenum)
+        .get("http://172.18.49.18:8585/" + this.xmid + "/yl_list/" + pagenum)
         .then(function(response) {
           // var time = {};
           // for (time in response.body.reslist) {
@@ -737,9 +750,12 @@ export default {
       this.loading_zxinfo = true;
       // this.spinning = true;
       this.$http
-        .get("http://localhost:8585/ylzx_info/" + this.zxid + "/" + pagenum, {
-          params: { zt: this.target_key }
-        })
+        .get(
+          "http://172.18.49.18:8585/ylzx_info/" + this.zxid + "/" + pagenum,
+          {
+            params: { zt: this.target_key }
+          }
+        )
         .then(function(response) {
           this.data_zxinfo = response.body.reslist;
           this.placement_zxinfo.total = response.body.maxsize;
@@ -749,7 +765,7 @@ export default {
               this.fetch_ylzxinfo(pagenum);
             }, 2000);
           } else {
-            this.spinning = false
+            this.spinning = false;
           }
         });
       this.loading_zxinfo = false;
@@ -762,7 +778,7 @@ export default {
       this.loading_runcanse = true;
       this.$http
         .post(
-          "http://localhost:8585/runcase",
+          "http://172.18.49.18:8585/runcase",
           { ylbh: key },
           {
             headers: { "Content-Type": "application/json", Accept: "*/*" }
@@ -788,7 +804,7 @@ export default {
     click_zxinfo(key) {
       this.visible_zxinfo = true;
       this.spinning = true;
-      this.zxid = key
+      this.zxid = key;
       this.fetch_ylzxinfo(this.placement_zxinfo.current);
       setTimeout(() => {
         this.init_char_cgl(), this.init_char_tgl(), this.init_char_xysj();
@@ -991,7 +1007,7 @@ export default {
       });
       this.uploading = true;
       this.$http
-        .post("http://localhost:8585/uploadfile", formData, {
+        .post("http://172.18.49.18:8585/uploadfile", formData, {
           headers: { "Content-Type": "multipart/form-data", Accept: "*/*" }
         })
         .then(function(res) {
@@ -1012,46 +1028,39 @@ export default {
     },
     casemake() {
       this.loading_makecase = true;
-      window.open('http://localhost:8585/makecase?' + 'url=' + this.url + '&' + 'cookie=' + this.cookie);
+      // window.open('http://172.18.49.18:8585/makecase?' + 'url=' + this.url + '&' + 'cookie=' + this.cookie);
+      // this.loading_makecase = false;
+      axios({
+        method: "get",
+        url: "http://172.18.49.18:8585/makecase",
+        params: { url: this.url, cookie: this.cookie },
+        responseType: "blob"
+      }).then(function(response) {
+        console.log(response);
+        // if (response.body.result === "fail") {
+        //   this.message.error(
+        //     "生成失败，请检查生成地址和cookie，无误请联系管理员"
+        //   );
+        // } else {
+        console.log(response.headers["content-type"]);
+        let blob = new Blob([response.data], {
+          type: response.headers["content-type"]
+        });
+        let downloadElement = document.createElement("a");
+        let href = window.URL.createObjectURL(blob); // 创建下载的链接
+        downloadElement.href = href;
+        // downloadElement.download = '123'+'.xlsx'; // 下载后文件名
+        document.body.appendChild(downloadElement);
+        downloadElement.click(); // 点击下载
+        document.body.removeChild(downloadElement); // 下载完成移除元素
+        window.URL.revokeObjectURL(href); // 释放掉blob对象
+        // }
+      })
       this.loading_makecase = false;
-      // this.$http
-      //   .post(
-      //     "http://localhost:8585/makecase",
-      //     { url: this.url, cookie: this.cookie },
-      //     {
-      //       headers: { "Content-Type": "application/json" }
-      //     },
-      //     {responseType: 'arraybuffer'}
-      //   )
-      //   .then(function(response) {
-      //       this.loading_makecase = false;
-      //       console.log(response)
-      //       // // fileDownload(response.body,'1111.xlsx');
-      //       // var blob = new Blob([response.body], {type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"});
-      //       // // var blob = new Blob([response.data], {type: 'application/vnd.ms-excel'});
-      //       // var downloadElement = document.createElement('a');
-      //       // var href = window.URL.createObjectURL(blob); // 创建下载的链接
-      //       // console.log(href);
-      //       // downloadElement.href = href;
-      //       // // downloadElement.download = '123'+'.xlsx'; // 下载后文件名
-      //       // document.body.appendChild(downloadElement);
-      //       // downloadElement.click(); // 点击下载
-      //       // document.body.removeChild(downloadElement); // 下载完成移除元素
-      //       // window.URL.revokeObjectURL(href); // 释放掉blob对象
-      //       let headers = response.headers
-      //       console.log(response.headers)
-      //       let blob = new Blob([response.body], {
-      //       type: headers.map['content-type']
-      //       })
-      //       let link = document.createElement('a')
-      //       link.href = window.URL.createObjectURL(blob)
-      //       // let title = 'xxxx.xlsx'
-      //       // link.download = title
-      //       link.click()
-      //     }, function(response){
-      //       this.loading_makecase = false;
-      //     }
-      //   );
+    },
+    click_dl_case(ylbh) {
+      window.open("http://172.18.49.18:8585" + "/downloadfile/" + ylbh);
+      window.close();
     }
   }
 };
@@ -1060,9 +1069,9 @@ export default {
 
 
 <style scoped>
-  .spin-content {
-    border: 1px solid #91d5ff;
-    background-color: #e6f7ff;
-    padding: 30px;
-  }
+.spin-content {
+  border: 1px solid #91d5ff;
+  background-color: #e6f7ff;
+  padding: 30px;
+}
 </style>

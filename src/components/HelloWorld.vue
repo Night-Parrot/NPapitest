@@ -283,7 +283,7 @@ export default {
     xm_list() {
       this.loading = true;
       this.$http
-        .get("http://localhost:8585/project_list")
+        .get("http://172.18.49.18:8585/project_list")
         .then(function(response) {
           this.data = response.body.reslist;
           this.pagination_xmlist.defaultPageSize = response.body.maxsize;
