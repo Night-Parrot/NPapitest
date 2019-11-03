@@ -98,13 +98,13 @@
 </template>
 
 <script>
+import axios from "axios";
 import G2 from "@antv/g2";
 export default {
   mounted() {
     this.init_fgl();
     this.init_tgl();
     this.xm_list();
-
   },
   data() {
     return {
@@ -282,12 +282,10 @@ export default {
   methods: {
     xm_list() {
       this.loading = true;
-      this.$http
-        .get("http://172.18.49.18:8585/project_list")
-        .then(function(response) {
-          this.data = response.body.reslist;
-          this.pagination_xmlist.defaultPageSize = response.body.maxsize;
-        });
+      axios({ method: "get", url: "project_list" }).then(response => {
+        this.data = response.data.reslist;
+        this.pagination_xmlist.defaultPageSize = response.data.maxsize;
+      });
       this.loading = false;
     },
     handleSearch(selectedKeys, confirm) {
@@ -370,7 +368,7 @@ export default {
     },
     zx_info(key) {
       // alert("这是点击事件")
-      alert("key:" + key)
+      alert("key:" + key);
     }
   }
 };
