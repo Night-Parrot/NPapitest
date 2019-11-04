@@ -66,10 +66,12 @@
             </a-radio-group>
             <a-table :columns="columns_zxinfo" :dataSource="data_zxinfo" class="components-table-demo-nested"
               :scroll="{y:670}" size="middle" style="margin-left:5px;margin-right:5px;" :pagination="placement_zxinfo"
-              :loading="loading_zxinfo" @change="handleTableChange_zxinfo">
+              :loading="loading_zxinfo" @change="handleTableChange_zxinfo" :expandRowByClick="true" >
               <a-table slot="expandedRowRender" slot-scope="record" :columns="innerColumns_zxinfo"
-                :dataSource="record.innerlist" :rowKey="record => record.key" :pagination="false" size="small"
-                style="margin-left: 15px;margin-right: 15px"></a-table>
+                :dataSource="record.innerlist" :rowKey="record => record.key" :pagination="false" size="small" :expandRowByClick="true"
+                style="margin-left: 15px;margin-right: 15px">
+                <p slot="expandedRowRender" slot-scope="record" style="margin: 0">{{record.sjfhz}}</p>
+              </a-table>
             </a-table>
           </div>
         </a-spin>
@@ -95,7 +97,8 @@
                 ]" style="margin-top: 20px;text-align:center" />
             </a-form-item>
             <a-form-item :label-col="formTailLayout.labelCol" :wrapper-col="formTailLayout.wrapperCol">
-              <a-button type="primary" style="margin-top: 20px;margin-left: 6px" :loading="loading_makecase" @click="casemake">
+              <a-button type="primary" style="margin-top: 20px;margin-left: 6px" :loading="loading_makecase"
+                @click="casemake">
                 生成用例
               </a-button>
             </a-form-item>
@@ -434,6 +437,12 @@
         //执行信息的详情获取
         this.loading_zxinfo = true;
         // this.spinning = true;
+        axios.get('tjxx', { params: { 'zxid': this.zxid } }).then(response => {
+          this.data_char_all = response.data;
+        });
+        axios.get('sjfb', { params: { 'zxid': this.zxid } }).then(response => {
+          this.char_xysj = response.data;
+        });
         axios
           .get("ylzx_info/" + this.zxid + "/" + pagenum, {
             params: { zt: this.target_key }
@@ -451,9 +460,6 @@
             }
           });
         this.loading_zxinfo = false;
-      },
-      hhh() {
-        alert("hhhhh");
       },
       click_info(key) {
         // 执行用例时的方法
@@ -482,22 +488,16 @@
         setTimeout(() => {
           this.fetch_ylxx(this.pagination_yl_list.current);
           this.fetch(1);
-        }, 800);
+        }, 1000);
       },
       click_zxinfo(key) {
         this.visible_zxinfo = true;
         this.spinning = true;
         this.zxid = key;
         this.fetch_ylzxinfo(this.placement_zxinfo.current);
-        axios.get('tjxx', {params: {'zxid': key}}).then(response => {
-          this.data_char_all = response.data;
-        })
-        axios.get('sjfb', {params: {'zxid': key}}).then(response => {
-          this.char_xysj = response.data;
-        })
         setTimeout(() => {
           this.init_char_cgl(), this.init_char_tgl(), this.init_char_xysj();
-        }, 1000);
+        }, 500);
       },
       click_del(key) {
         alert("delkey:" + key);
@@ -557,7 +557,7 @@
             stroke: "#fff"
           });
         chart.render();
-        // interval.setSelected(data_char_all[0][0]);
+        // interval.setSelected(this.data_char_all[0][0]);
       },
       init_char_tgl() {
         var chart = new G2.Chart({
@@ -615,19 +615,20 @@
             stroke: "#fff"
           });
         chart.render();
-        // interval.setSelected(data_char_all[1][0]);
+        // interval.setSelected(this.data_char_all[1][0]);
       },
       init_char_xysj() {
-        console.log(this.char_xysj);
-        
         var chart = new G2.Chart({
           container: "char_xysj",
           height: 300,
           width: 465,
-          padding: [20, 100, 60, 100]
+          padding: [20, 60, 60, 60]
         });
         chart.source(this.char_xysj, {
           expected: {
+            ticks: [0, 5000, 10000]
+          },
+          actual: {
             ticks: [0, 5000, 10000]
           }
         });
@@ -639,36 +640,25 @@
           position: "right",
           label: {
             formatter: function formatter(val) {
-              if (val === "200") {
-                return "";
+              if (val === '8000') {
+                return '';
               }
               return val;
             }
           }
         });
         chart.legend(false);
-        chart
-          .interval()
-          .position("date*expected")
-          .color("#87CEFA")
-          .shape("borderRadius")
-          .tooltip("expected")
-          .opacity(0.6);
-        chart
-          .interval()
-          .position("date*actual")
-          .color("#db0d2d")
-          .tooltip("actual")
-          .shape("date*actual", function (date, val) {
-            if (val === 0) {
-              return;
-            } else {
-              return "borderRadius";
-            }
-          });
+        chart.interval().position('date*expected').color('#121a2a').shape('borderRadius').tooltip('expected').opacity(0.6);
+        chart.interval().position('date*actual').color('#f36c21').tooltip('actual').shape('date*actual', function (date, val) {
+          if (val === 0) {
+            return;
+          } else {
+            return 'borderRadius';
+          }
+        });
         chart.guide().text({
-          position: ["min", "min"],
-          content: "响应时间分布",
+          position: ["min", "max"],
+          content: "响应时间分布(单位: 毫秒)",
           style: {
             fill: "#ff2c55",
             fontSize: 20,
@@ -680,7 +670,22 @@
       },
       handleSizeChange(e) {
         this.target_key = e.target.value;
-        this.fetch_ylzxinfo(1);
+        axios
+          .get("ylzx_info/" + this.zxid + "/" + 1, {
+            params: { zt: this.target_key }
+          })
+          .then(response => {
+            this.data_zxinfo = response.data.reslist;
+            this.placement_zxinfo.total = response.data.maxsize;
+            this.placement_zxinfo.current = 1;
+            if (response.data.zt === "0") {
+              setTimeout(() => {
+                this.fetch_ylzxinfo(1);
+              }, 2000);
+            } else {
+              this.spinning = false;
+            }
+          });
       },
       handleRemove(file) {
         const index = this.fileList.indexOf(file);
@@ -731,7 +736,7 @@
               params: values,
               responseType: "blob"
             })
-              .then( (response) => {
+              .then((response) => {
                 // console.log(response.headers["content-type"]);
                 if (response.headers["content-type"] != "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet") {
                   this.$message.error("用例生成失败，请检查填写的内容或联系管理员")
@@ -780,13 +785,6 @@
         });
         this.loading_download = false;
       },
-      check() {
-        this.form.validateFields((err, values) => {
-          if (!err) {
-            console.log(values);
-          }
-        });
-      },
     }
   };
 </script>
@@ -799,5 +797,4 @@
     background-color: #e6f7ff;
     padding: 30px;
   }
-
 </style>
