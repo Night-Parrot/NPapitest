@@ -108,7 +108,7 @@
           <h2>不要直接使用swagger地址</h2>
           <h2>在访问swagger页面的时候，查看所有请求</h2>
           <h2>返回全部接口数据的接口地址，才是可以使用的地址</h2>
-          <h2>一般情况下包含api-doc的就是可以用来生成模板的地址</h2>
+          <h2>一般情况下包含api-docs的就是可以用来生成模板的地址</h2>
         </div>
       </a-drawer>
     </div>
@@ -497,7 +497,7 @@
         })
         setTimeout(() => {
           this.init_char_cgl(), this.init_char_tgl(), this.init_char_xysj();
-        }, 500);
+        }, 1000);
       },
       click_del(key) {
         alert("delkey:" + key);

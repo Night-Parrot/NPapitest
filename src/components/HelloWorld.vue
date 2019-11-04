@@ -1,5 +1,6 @@
 <template>
   <div>
+    <a-button type="primary" style="float: right;margin-top: 10px; margin-right: 20px" :loading="loading_yhsc" @click="dl_yhsc">下载使用说明</a-button>
     <div style="float: left;margin-left: 15px;width: 15%;margin-top: 15px;">
       <a-table
         :dataSource="data"
@@ -112,6 +113,7 @@ export default {
       loading: false,
       searchText: "",
       searchInput: null,
+      loading_yhsc: false,
       columns: [
         {
           title: "项目名称",
@@ -369,6 +371,25 @@ export default {
     zx_info(key) {
       // alert("这是点击事件")
       alert("key:" + key);
+    },
+    dl_yhsc() {
+      this.loading_yhsc = true;
+      axios.get('downloadyhsc', {responseType: 'blob'}).then(response=>{
+        console.log(response);
+        
+        let blob = new Blob([response.data], {
+          type: response.headers["content-type"]
+        });
+        let downloadElement = document.createElement("a");
+        let href = window.URL.createObjectURL(blob); // 创建下载的链接
+        downloadElement.href = href;
+        downloadElement.download = '使用手册.docx'
+        document.body.appendChild(downloadElement);
+        downloadElement.click(); // 点击下载
+        document.body.removeChild(downloadElement); // 下载完成移除元素
+        window.URL.revokeObjectURL(href); // 释放掉blob对象
+      });
+      this.loading_yhsc =false;
     }
   }
 };
