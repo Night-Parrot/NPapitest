@@ -70,7 +70,7 @@
               <a-table slot="expandedRowRender" slot-scope="record" :columns="innerColumns_zxinfo"
                 :dataSource="record.innerlist" :rowKey="record => record.key" :pagination="false" size="small" :expandRowByClick="true"
                 style="margin-left: 15px;margin-right: 15px">
-                <p slot="expandedRowRender" slot-scope="record" style="margin: 0">{{record.sjfhz}}</p>
+                <p slot="expandedRowRender" slot-scope="record" style="margin: 0">{{record.matchinfo}}</p>
               </a-table>
             </a-table>
           </div>
@@ -437,12 +437,6 @@
         //执行信息的详情获取
         this.loading_zxinfo = true;
         // this.spinning = true;
-        axios.get('tjxx', { params: { 'zxid': this.zxid } }).then(response => {
-          this.data_char_all = response.data;
-        });
-        axios.get('sjfb', { params: { 'zxid': this.zxid } }).then(response => {
-          this.char_xysj = response.data;
-        });
         axios
           .get("ylzx_info/" + this.zxid + "/" + pagenum, {
             params: { zt: this.target_key }
@@ -451,11 +445,23 @@
             this.data_zxinfo = response.data.reslist;
             this.placement_zxinfo.total = response.data.maxsize;
             this.placement_zxinfo.current = pagenum;
+            document.getElementById('char_xysj').innerHTML = '';
+            document.getElementById('char_cgl').innerHTML = '';
+            document.getElementById('char_tgl').innerHTML = '';
+            this.tjsj();
             if (response.data.zt === "0") {
               setTimeout(() => {
+                this.init_char_cgl();
+                this.init_char_tgl();
+                this.init_char_xysj();
                 this.fetch_ylzxinfo(pagenum);
               }, 2000);
             } else {
+              setTimeout(() => {
+                this.init_char_cgl();
+                this.init_char_tgl();
+                this.init_char_xysj();
+              }, 500);
               this.spinning = false;
             }
           });
@@ -495,9 +501,9 @@
         this.spinning = true;
         this.zxid = key;
         this.fetch_ylzxinfo(this.placement_zxinfo.current);
-        setTimeout(() => {
-          this.init_char_cgl(), this.init_char_tgl(), this.init_char_xysj();
-        }, 500);
+        // setTimeout(() => {
+        //   this.init_char_cgl(), this.init_char_tgl(), this.init_char_xysj();
+        // }, 500);
       },
       click_del(key) {
         alert("delkey:" + key);
@@ -531,11 +537,12 @@
         chart.guide().html({
           position: ["50%", "50%"],
           html:
-            '<div style="color:#8c8c8c;font-size: 14px;text-align: center;width: 10em;">成功率</div>',
+            '<div style="color:#8c8c8c;font-size: 14px;text-align: center;width: 4em;">成功率</div>',
           alignX: "middle",
           alignY: "middle"
         });
-        var interval = chart
+        // var interval = chart
+        chart
           .intervalStack()
           .position("percent")
           .color("item")
@@ -589,11 +596,12 @@
         chart.guide().html({
           position: ["50%", "50%"],
           html:
-            '<div style="color:#8c8c8c;font-size: 14px;text-align: center;width: 10em;">通过率</div>',
+            '<div style="color:#8c8c8c;font-size: 14px;text-align: center;width: 4em;">通过率</div>',
           alignX: "middle",
           alignY: "middle"
         });
-        var interval = chart
+        // var interval = chart
+        chart
           .intervalStack()
           .position("percent")
           .color("item")
@@ -626,10 +634,10 @@
         });
         chart.source(this.char_xysj, {
           expected: {
-            ticks: [0, 5000, 10000]
+            ticks: [0, 3000, 8000]
           },
           actual: {
-            ticks: [0, 5000, 10000]
+            ticks: [0, 3000, 8000]
           }
         });
         chart.axis("date", false);
@@ -640,7 +648,7 @@
           position: "right",
           label: {
             formatter: function formatter(val) {
-              if (val === '8000') {
+              if (val === '85000') {
                 return '';
               }
               return val;
@@ -648,8 +656,8 @@
           }
         });
         chart.legend(false);
-        chart.interval().position('date*expected').color('#121a2a').shape('borderRadius').tooltip('expected').opacity(0.6);
-        chart.interval().position('date*actual').color('#f36c21').tooltip('actual').shape('date*actual', function (date, val) {
+        chart.interval().position('date*expected').color('#ffe600').shape('borderRadius').tooltip('expected').opacity(0.6);
+        chart.interval().position('date*actual').color('#a7324a').tooltip('actual').shape('date*actual', function (date, val) {
           if (val === 0) {
             return;
           } else {
@@ -729,7 +737,7 @@
         this.loading_makecase = true;
         this.form.validateFields((err, values) => {
           if (!err) {
-            console.log(values);
+            // console.log(values);
             axios({
               method: "get",
               url: "makecase",
@@ -765,7 +773,7 @@
           url: "/downloadfile/" + ylbh,
           responseType: "blob"
         }).then(response => {
-          console.log(response);
+          // console.log(response);
           if (response.headers["content-type"] != "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet") {
             this.$message.error("用例下载失败，可能是文件损坏或丢失，请联系管理员")
           }
@@ -785,6 +793,14 @@
         });
         this.loading_download = false;
       },
+      tjsj() {
+        axios.get('tjxx', { params: { 'zxid': this.zxid } }).then(response => {
+          this.data_char_all = response.data;
+        });
+        axios.get('sjfb', { params: { 'zxid': this.zxid } }).then(response => {
+          this.char_xysj = response.data;
+        });
+      }
     }
   };
 </script>
