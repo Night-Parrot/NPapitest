@@ -22,7 +22,8 @@
               style="margin-left: 30px;margin-right: 30px;">
               <H3 slot="title">用例列表</H3>
               <span slot="action_yl" slot-scope="record">
-                <a-button type="primary" :loading="loading_runcanse" @click="click_info(record.ylbh)">执行</a-button>
+                <!-- <a-button type="primary" :loading="loading_runcanse" @click="click_info(record.ylbh)">执行</a-button> -->
+                <a-button type="primary" :loading="loading_runcanse" @click="child_draw">执行</a-button>
                 <a-divider type="vertical" />
                 <a-button type="primary" :loading="loading_download" @click="click_dl_case(record.ylbh)">下载</a-button>
                 <a-divider type="vertical" />
@@ -31,6 +32,44 @@
             </a-table>
           </div>
         </div>
+      </a-drawer>
+      <a-drawer
+        title="执行参数"
+        width="700"
+        :closable="true"
+        @close="onClose_zxcs"
+        :visible="visible_zxcs"
+        :destroyOnClose="true"
+      >
+        <a-button type="primary" style="margin-bottom: 10px">按照以下参数执行用例</a-button>
+        <a-table :columns="columns_zxcs" :scroll="{y:700}" :pagination="placement_zxcs" :dataSource="data_zxcs" bordered>
+          <template
+            v-for="col in ['name', 'age']"
+            :slot="col"
+            slot-scope="text, record, index"
+          >
+            <div :key="col">
+              <a-input
+                v-if="record.editable"
+                style="margin: -5px 0"
+                :value="text"
+                @change="e => handleChange(e.target.value, record.key, col)"
+              />
+              <template v-else>{{text}}</template>
+            </div>
+          </template>
+          <template slot="operation" slot-scope="text, record, index">
+            <div class="editable-row-operations">
+              <span v-if="record.editable">
+                <a @click="() => save(record.key)" style="margin-right: 8px;">保存</a>
+                <a @click="() => cancel(record.key)" style="margin-right: 8px;">取消</a>
+              </span>
+              <span v-else>
+                <a @click="() => edit(record.key)">编辑</a>
+              </span>
+            </div>
+          </template>
+        </a-table>
       </a-drawer>
     </div>
     <!-- ============================================================================================================================== -->
@@ -145,6 +184,35 @@
   import G2 from "@antv/g2";
   import axios from "axios";
 
+// ==============执行参数的列名===============
+const columns_zxcs = [
+    {
+      title: '参数名称',
+      dataIndex: 'name',
+      width: '28%',
+      scopedSlots: { customRender: 'name' },
+    },
+    {
+      title: '参数值',
+      dataIndex: 'age',
+      width: '55%',
+      scopedSlots: { customRender: 'age' },
+    },
+    {
+      title: '操作',
+      dataIndex: 'operation',
+      scopedSlots: { customRender: 'operation' },
+    }
+  ];
+const data_zxcs = [];
+  for (let i = 0; i < 100; i++) {
+    data_zxcs.push({
+      key: i.toString(),
+      name: `Edrward ${i}`,
+      age: 32
+    });
+  }
+// ==============执行参数的列名===============
   const formItemLayout = {
     labelCol: { span: 5 },
     wrapperCol: { span: 25 },
@@ -322,7 +390,11 @@
       this.fetch(1);
     },
     data() {
+      this.cacheData = data_zxcs.map(item => ({ ...item }));
       return {
+        columns_zxcs,
+        data_zxcs,
+        visible_zxcs: false,
         url: "",
         cookie: "",
         loading_runcanse: false,
@@ -368,6 +440,10 @@
           showQuickJumper: true,
           position: "bottom",
           current: 1
+        },
+        placement_zxcs: {
+          hideOnSinglePage: true,
+          defaultPageSize: 500
         },
         loading: false,
         loading_list: false,
@@ -800,6 +876,46 @@
         axios.get('sjfb', { params: { 'zxid': this.zxid } }).then(response => {
           this.char_xysj = response.data;
         });
+      },
+      child_draw () {
+        this.visible_zxcs = true;
+      },
+      onClose_zxcs () {
+        this.visible_zxcs = false;
+      },
+      handleChange(value, key, column) {
+        const newData = [...this.data_zxcs];
+        const target = newData.filter(item => key === item.key)[0];
+        if (target) {
+          target[column] = value;
+          this.data_zxcs = newData;
+        }
+      },
+      edit(key) {
+        const newData = [...this.data_zxcs];
+        const target = newData.filter(item => key === item.key)[0];
+        if (target) {
+          target.editable = true;
+          this.data_zxcs = newData;
+        }
+      },
+      save(key) {
+        const newData = [...this.data_zxcs];
+        const target = newData.filter(item => key === item.key)[0];
+        if (target) {
+          delete target.editable;
+          this.data_zxcs = newData;
+          this.cacheData = newData.map(item => ({ ...item }));
+        }
+      },
+      cancel(key) {
+        const newData = [...this.data_zxcs];
+        const target = newData.filter(item => key === item.key)[0];
+        if (target) {
+          Object.assign(target, this.cacheData.filter(item => key === item.key)[0]);
+          delete target.editable;
+          this.data_zxcs = newData;
+        }
       }
     }
   };

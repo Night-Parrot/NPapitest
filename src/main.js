@@ -18,7 +18,7 @@ Vue.use(Antd)
 Vue.use(axios)
 Vue.use(preview)
 Vue.config.productionTip = false
-axios.defaults.baseURL = 'http://172.18.49.18:8585/';
+axios.defaults.baseURL = 'http://localhost:8585/';
 
 
 new Vue({
