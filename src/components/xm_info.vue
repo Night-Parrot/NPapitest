@@ -23,7 +23,7 @@
               <H3 slot="title">用例列表</H3>
               <span slot="action_yl" slot-scope="record">
                 <!-- <a-button type="primary" :loading="loading_runcanse" @click="click_info(record.ylbh)">执行</a-button> -->
-                <a-button type="primary" :loading="loading_runcanse" @click="child_draw">执行</a-button>
+                <a-button type="primary" :loading="loading_runcanse" @click="child_draw(record.ylbh)">执行</a-button>
                 <a-divider type="vertical" />
                 <a-button type="primary" :loading="loading_download" @click="click_dl_case(record.ylbh)">下载</a-button>
                 <a-divider type="vertical" />
@@ -42,11 +42,11 @@
         :destroyOnClose="true"
       >
         <a-button type="primary" style="margin-bottom: 10px">按照以下参数执行用例</a-button>
-        <a-table :columns="columns_zxcs" :scroll="{y:700}" :pagination="placement_zxcs" :dataSource="data_zxcs" bordered>
-          <template
-            v-for="col in ['name', 'age']"
+        <a-table :columns="columns_zxcs" :scroll="{y:750}" :pagination="placement_zxcs" :dataSource="data_zxcs" tableLayout="fixed" bordered>
+          <template 
+            v-for="col in ['zxcs_key', 'zxcs_value']"
             :slot="col"
-            slot-scope="text, record, index"
+            slot-scope="text, record"
           >
             <div :key="col">
               <a-input
@@ -58,7 +58,7 @@
               <template v-else>{{text}}</template>
             </div>
           </template>
-          <template slot="operation" slot-scope="text, record, index">
+          <template slot="operation" slot-scope="text, record">
             <div class="editable-row-operations">
               <span v-if="record.editable">
                 <a @click="() => save(record.key)" style="margin-right: 8px;">保存</a>
@@ -188,15 +188,20 @@
 const columns_zxcs = [
     {
       title: '参数名称',
-      dataIndex: 'name',
+      dataIndex: 'zxcs_key',
       width: '28%',
-      scopedSlots: { customRender: 'name' },
+      scopedSlots: { customRender: 'zxcs_key' },
+      align: 'left',
+      ellipsis: true,
     },
     {
       title: '参数值',
-      dataIndex: 'age',
+      dataIndex: 'zxcs_value',
       width: '55%',
-      scopedSlots: { customRender: 'age' },
+      align: 'left',
+      scopedSlots: { customRender: 'zxcs_value' },
+      ellipsis: true,
+      // render: text => <div className={styles.smileDark} title={text}>{text}</div>,
     },
     {
       title: '操作',
@@ -204,15 +209,12 @@ const columns_zxcs = [
       scopedSlots: { customRender: 'operation' },
     }
   ];
-const data_zxcs = [];
-  for (let i = 0; i < 100; i++) {
-    data_zxcs.push({
-      key: i.toString(),
-      name: `Edrward ${i}`,
-      age: 32
-    });
-  }
+const data_zxcs = []; // 下面的data前的数据调用，需要这个参数，不可以注销
 // ==============执行参数的列名===============
+
+
+
+
   const formItemLayout = {
     labelCol: { span: 5 },
     wrapperCol: { span: 25 },
@@ -297,21 +299,6 @@ const data_zxcs = [];
     }
   ];
 
-  // =====成功率饼图的数据===================
-  // var data_char_all = [
-  //   {
-  //     item: "调用成功",
-  //     count: 40,
-  //     percent: 0.4
-  //   },
-  //   {
-  //     item: "调用失败",
-  //     count: 21,
-  //     percent: 0.21
-  //   }
-  // ];
-
-  // =================================
   const columns_zxinfo = [
     {
       title: "名称",
@@ -392,8 +379,8 @@ const data_zxcs = [];
     data() {
       this.cacheData = data_zxcs.map(item => ({ ...item }));
       return {
-        columns_zxcs,
-        data_zxcs,
+        columns_zxcs: columns_zxcs,
+        data_zxcs: [],
         visible_zxcs: false,
         url: "",
         cookie: "",
@@ -443,7 +430,7 @@ const data_zxcs = [];
         },
         placement_zxcs: {
           hideOnSinglePage: true,
-          defaultPageSize: 500
+          defaultPageSize: 1000
         },
         loading: false,
         loading_list: false,
@@ -877,8 +864,12 @@ const data_zxcs = [];
           this.char_xysj = response.data;
         });
       },
-      child_draw () {
+      child_draw (ylbh) {
         this.visible_zxcs = true;
+        axios.get('zxcs', { params: { 'ylbh': ylbh } }).then(response => {
+          this.placement_zxcs.defaultPageSize = response.data.maxsize;
+          this.data_zxcs = response.data.reslist;
+        })
       },
       onClose_zxcs () {
         this.visible_zxcs = false;
@@ -924,9 +915,11 @@ const data_zxcs = [];
 
 
 <style scoped>
-  .spin-content {
-    border: 1px solid #91d5ff;
-    background-color: #e6f7ff;
-    padding: 30px;
+  .smileDark {
+  width: 200px;
+  overflow: hidden;
+  font-size: large;
+  white-space: nowrap;
+  text-overflow: ellipsis;
   }
 </style>
