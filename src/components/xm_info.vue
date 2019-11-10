@@ -23,11 +23,25 @@
               <H3 slot="title">用例列表</H3>
               <span slot="action_yl" slot-scope="record">
                 <!-- <a-button type="primary" :loading="loading_runcanse" @click="click_info(record.ylbh)">执行</a-button> -->
-                <a-button type="primary" :loading="loading_runcanse" @click="child_draw(record.ylbh)">执行</a-button>
+                <a-button type="primary" :loading="loading_runcanse" @click="child_draw(record.ylbh)"><a-icon type="smile" theme="twoTone" twoToneColor="#ffe600" />执行</a-button>
                 <a-divider type="vertical" />
-                <a-button type="primary" :loading="loading_download" @click="click_dl_case(record.ylbh)">下载</a-button>
+                <a-button type="primary" :loading="loading_download" @click="click_dl_case(record.ylbh)"><a-icon type="cloud-download"/>下载</a-button>
                 <a-divider type="vertical" />
-                <a-button type="primary" :loading="loading" @click="click_del(record.zxcs)">删除</a-button>
+                <!-- <a-button type="primary">更新用例</a-button> -->
+                <a-button type="primary" :loading="loading" @click="click_del(record.zxcs)"><a-icon type="delete"/>删除</a-button>
+                <div style="float: right;width: 100px;margin-top: 1px;height: 30px;">
+                  <a-upload-dragger
+                      name="file"
+                      :multiple="false"
+                      :showUploadList="false"
+                      @change="handleChange_ylgx(record.ylbh)"
+                      :fileList="fileList_upyl"
+                      :beforeUpload="beforeUpload_ylgx"
+                      :disabled="fileList_upyl.length !== 0"
+                    >
+                    <p style="margin-top:3px"><a-icon type="cloud-upload"/> 用例更新</p>
+                  </a-upload-dragger>
+                </div>
               </span>
             </a-table>
           </div>
@@ -43,7 +57,7 @@
       >
         <a-button type="primary" style="margin-bottom: 10px">按照以下参数执行用例</a-button>
         <a-table :columns="columns_zxcs" :scroll="{y:750}" :pagination="placement_zxcs" :dataSource="data_zxcs" tableLayout="fixed" bordered>
-          <template 
+          <!-- <template 
             v-for="col in ['zxcs_key', 'zxcs_value']"
             :slot="col"
             slot-scope="text, record"
@@ -51,18 +65,48 @@
             <div :key="col">
               <a-input
                 v-if="record.editable"
-                style="margin: -5px 0"
+                style="margin: -5px 0;"
                 :value="text"
                 @change="e => handleChange(e.target.value, record.key, col)"
+              />
+              <template v-else>{{text}}</template>
+            </div>
+          </template> -->
+          <template 
+            v-for="col_key in ['zxcs_key']"
+            :slot="col_key"
+            slot-scope="text, record"
+          >
+            <div :key="col_key" style="width: 144px;white-space: nowrap;overflow: hidden;text-overflow:ellipsis;" :title="text">
+              <a-input
+                v-if="record.editable_key"
+                style="margin: 0.5px 0"
+                :value="text"
+                @change="e => handleChange(e.target.value, record.key, col_key)"
+              />
+              <template v-else>{{text}}</template>
+            </div>
+          </template>
+          <template 
+            v-for="col_value in ['zxcs_value']"
+            :slot="col_value"
+            slot-scope="text, record"
+          >
+            <div :key="col_value" style="width: 296px;white-space: nowrap;overflow: hidden;text-overflow:ellipsis;" :title="text">
+              <a-input
+                v-if="record.editable_value"
+                style="margin: 0.5px 0"
+                :value="text"
+                @change="e => handleChange(e.target.value, record.key, col_value)"
               />
               <template v-else>{{text}}</template>
             </div>
           </template>
           <template slot="operation" slot-scope="text, record">
             <div class="editable-row-operations">
-              <span v-if="record.editable">
+              <span v-if="record.editable_key">
                 <a @click="() => save(record.key)" style="margin-right: 8px;">保存</a>
-                <a @click="() => cancel(record.key)" style="margin-right: 8px;">取消</a>
+                <a @click="() => cancel(record.key)" style="margin-right: 1px;">取消</a>
               </span>
               <span v-else>
                 <a @click="() => edit(record.key)">编辑</a>
@@ -192,20 +236,18 @@ const columns_zxcs = [
       width: '28%',
       scopedSlots: { customRender: 'zxcs_key' },
       align: 'left',
-      ellipsis: true,
     },
     {
       title: '参数值',
       dataIndex: 'zxcs_value',
-      width: '55%',
       align: 'left',
       scopedSlots: { customRender: 'zxcs_value' },
-      ellipsis: true,
-      // render: text => <div className={styles.smileDark} title={text}>{text}</div>,
     },
     {
       title: '操作',
+      width: '20%',
       dataIndex: 'operation',
+      align: 'center',
       scopedSlots: { customRender: 'operation' },
     }
   ];
@@ -273,27 +315,27 @@ const data_zxcs = []; // 下面的data前的数据调用，需要这个参数，
       title: "名称",
       dataIndex: "ylmc",
       key: "ylmc",
-      width: 400,
+      // width: "20%",
       align: "center"
     },
     {
       title: "上传时间",
       dataIndex: "scsj",
       key: "scsj",
-      width: 400,
+      width: "20%",
       align: "center"
     },
     {
       title: "执行次数",
       dataIndex: "zxcs",
       key: "zxcs",
-      width: 400,
+      width: "20%",
       align: "center"
     },
     {
       title: "操作",
       key: "action_yl",
-      width: 300,
+      width: "23%",
       scopedSlots: { customRender: "action_yl" },
       align: "center"
     }
@@ -404,6 +446,7 @@ const data_zxcs = []; // 下面的data前的数据调用，需要这个参数，
         visible_tjfx: false,
         visible_ylsc: false,
         fileList: [],
+        fileList_upyl: [],
         uploading: false,
         placement: "top",
         placement_ylsc: "right",
@@ -430,7 +473,7 @@ const data_zxcs = []; // 下面的data前的数据调用，需要这个参数，
         },
         placement_zxcs: {
           hideOnSinglePage: true,
-          defaultPageSize: 1000
+          pageSize: null,
         },
         loading: false,
         loading_list: false,
@@ -470,6 +513,7 @@ const data_zxcs = []; // 下面的data前的数据调用，需要这个参数，
         this.visible_zxinfo = false;
         this.visible_ylsc = false;
         this.fileList = [];
+        this.fileList_upyl = [];
         this.uploading = false;
         this.data_zxinfo = [];
         this.innerData_zxinfo = [];
@@ -794,7 +838,7 @@ const data_zxcs = []; // 下面的data前的数据调用，需要这个参数，
         setTimeout(() => {
           this.fetch_ylxx(1);
           this.pagination_yl_list.current = 1;
-        }, 400);
+        }, 1000);
       },
       casemake() {
         this.loading_makecase = true;
@@ -836,7 +880,7 @@ const data_zxcs = []; // 下面的data前的数据调用，需要这个参数，
           url: "/downloadfile/" + ylbh,
           responseType: "blob"
         }).then(response => {
-          // console.log(response);
+          console.log(response);
           if (response.headers["content-type"] != "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet") {
             this.$message.error("用例下载失败，可能是文件损坏或丢失，请联系管理员")
           }
@@ -848,6 +892,7 @@ const data_zxcs = []; // 下面的data前的数据调用，需要这个参数，
             let downloadElement = document.createElement("a");
             let href = window.URL.createObjectURL(blob); // 创建下载的链接
             downloadElement.href = href;
+            downloadElement.download = response.headers["content-disposition"] + '.xlsx'
             document.body.appendChild(downloadElement);
             downloadElement.click(); // 点击下载
             document.body.removeChild(downloadElement); // 下载完成移除元素
@@ -867,12 +912,13 @@ const data_zxcs = []; // 下面的data前的数据调用，需要这个参数，
       child_draw (ylbh) {
         this.visible_zxcs = true;
         axios.get('zxcs', { params: { 'ylbh': ylbh } }).then(response => {
-          this.placement_zxcs.defaultPageSize = response.data.maxsize;
+          this.placement_zxcs.pageSize = response.data.maxsize;
           this.data_zxcs = response.data.reslist;
         })
       },
       onClose_zxcs () {
         this.visible_zxcs = false;
+        this.data_zxcs = [];
       },
       handleChange(value, key, column) {
         const newData = [...this.data_zxcs];
@@ -886,7 +932,8 @@ const data_zxcs = []; // 下面的data前的数据调用，需要这个参数，
         const newData = [...this.data_zxcs];
         const target = newData.filter(item => key === item.key)[0];
         if (target) {
-          target.editable = true;
+          target.editable_key = true;
+          target.editable_value = true;
           this.data_zxcs = newData;
         }
       },
@@ -894,7 +941,8 @@ const data_zxcs = []; // 下面的data前的数据调用，需要这个参数，
         const newData = [...this.data_zxcs];
         const target = newData.filter(item => key === item.key)[0];
         if (target) {
-          delete target.editable;
+          delete target.editable_key;
+          delete target.editable_value;
           this.data_zxcs = newData;
           this.cacheData = newData.map(item => ({ ...item }));
         }
@@ -904,22 +952,38 @@ const data_zxcs = []; // 下面的data前的数据调用，需要这个参数，
         const target = newData.filter(item => key === item.key)[0];
         if (target) {
           Object.assign(target, this.cacheData.filter(item => key === item.key)[0]);
-          delete target.editable;
+          delete target.editable_key;
+          delete target.editable_value;
           this.data_zxcs = newData;
         }
-      }
+      },
+      handleChange_ylgx(ylbh) {
+        const { fileList_upyl } = this;
+        const formData = new FormData();
+        formData.append("ylbh", ylbh);
+        debugger;
+        console.log(this.fileList_upyl);
+        fileList_upyl.forEach(file => {
+          formData.append("file", file);
+        });
+        axios
+          .post("updatefile", formData, {
+            headers: { "Content-Type": "multipart/form-data", Accept: "*/*" }
+          })
+          .then(res => {
+            if (res.data.result === "success") {
+              this.fileList_upyl = [];
+              this.$message.success("更新成功");
+            } else {
+              this.fileList_upyl = [];
+              this.$message.error(res.data.msg);
+            }
+          });
+      },
+      beforeUpload_ylgx(file) {
+        this.fileList_upyl = [...this.fileList_upyl, file];
+        return false;
+      },
     }
   };
 </script>
-
-
-
-<style scoped>
-  .smileDark {
-  width: 200px;
-  overflow: hidden;
-  font-size: large;
-  white-space: nowrap;
-  text-overflow: ellipsis;
-  }
-</style>
