@@ -28,18 +28,21 @@
                 <a-button type="primary" :loading="loading_download" @click="click_dl_case(record.ylbh)"><a-icon type="cloud-download"/>下载</a-button>
                 <a-divider type="vertical" />
                 <!-- <a-button type="primary">更新用例</a-button> -->
-                <a-button type="primary" :loading="loading" @click="click_del(record.zxcs)"><a-icon type="delete"/>删除</a-button>
+                <a-popconfirm title="确认删除么?" @confirm="() => del_yl(record.ylbh)" okText="确认" cancelText="取消">
+                  <a-button type="primary" :loading="loading" @click="claer_ylgx"><a-icon type="delete"/>删除</a-button>
+                </a-popconfirm>
                 <div style="float: right;width: 100px;margin-top: 1px;height: 30px;">
                   <a-upload-dragger
                       name="file"
                       :multiple="false"
                       :showUploadList="false"
-                      @change="handleChange_ylgx(record.ylbh)"
                       :fileList="fileList_upyl"
                       :beforeUpload="beforeUpload_ylgx"
                       :disabled="fileList_upyl.length !== 0"
                     >
-                    <p style="margin-top:3px"><a-icon type="cloud-upload"/> 用例更新</p>
+                    <a-popconfirm title="确认更新么?" @cancel="claer_ylgx" @confirm="() => handleChange_ylgx(record.ylbh)" :visible="fileList_upyl.length !== 0"  okText="确认" cancelText="取消">
+                      <p style="margin-top:3px"><a-icon type="cloud-upload"/> 用例更新</p>
+                    </a-popconfirm>
                   </a-upload-dragger>
                 </div>
               </span>
@@ -521,6 +524,7 @@ const data_zxcs = []; // 下面的data前的数据调用，需要这个参数，
         this.placement_zxinfo.current = 1;
         this.zxid = "";
         this.loading_download = false;
+        this.data_yl = [];
       },
       fetch(pagenum) {
         this.loading_list = true;
@@ -961,7 +965,6 @@ const data_zxcs = []; // 下面的data前的数据调用，需要这个参数，
         const { fileList_upyl } = this;
         const formData = new FormData();
         formData.append("ylbh", ylbh);
-        debugger;
         console.log(this.fileList_upyl);
         fileList_upyl.forEach(file => {
           formData.append("file", file);
@@ -983,6 +986,18 @@ const data_zxcs = []; // 下面的data前的数据调用，需要这个参数，
       beforeUpload_ylgx(file) {
         this.fileList_upyl = [...this.fileList_upyl, file];
         return false;
+      },
+      del_yl(ylbh) {
+        axios.delete('del_yl/' + ylbh).then(res => {
+          if (res.data.result === 'success') {
+            this.fetch_ylxx(this.pagination_yl_list.current)
+          } else {
+            this.$message.error('删除用例失败，请重试😔')
+          }
+        })
+      },
+      claer_ylgx() {
+        this.fileList_upyl = []
       },
     }
   };
