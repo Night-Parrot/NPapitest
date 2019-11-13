@@ -39,10 +39,12 @@
                       :fileList="fileList_upyl"
                       :beforeUpload="beforeUpload_ylgx"
                       :disabled="fileList_upyl.length !== 0"
+                      @change="handleChange_ylgx(record.ylbh)"
                     >
-                    <a-popconfirm title="确认更新么?" @cancel="claer_ylgx" @confirm="() => handleChange_ylgx(record.ylbh)" :visible="fileList_upyl.length !== 0"  okText="确认" cancelText="取消">
+                    <!-- :data="updatefile_fun(record.xh)" -->
+                    <!-- <a-popconfirm title="确认更新么?" @cancel="claer_ylgx" @confirm="() => handleChange_ylgx(record.ylbh)" :visible="record.update == 1"  okText="确认" cancelText="取消"> -->
                       <p style="margin-top:3px"><a-icon type="cloud-upload"/> 用例更新</p>
-                    </a-popconfirm>
+                    <!-- </a-popconfirm> -->
                   </a-upload-dragger>
                 </div>
               </span>
@@ -58,7 +60,7 @@
         :visible="visible_zxcs"
         :destroyOnClose="true"
       >
-        <a-button type="primary" style="margin-bottom: 10px">按照以下参数执行用例</a-button>
+        <a-button type="primary" style="margin-bottom: 10px" @click="click_info">按照以下参数执行用例</a-button>
         <a-table :columns="columns_zxcs" :scroll="{y:750}" :pagination="placement_zxcs" :dataSource="data_zxcs" tableLayout="fixed" bordered>
           <!-- <template 
             v-for="col in ['zxcs_key', 'zxcs_value']"
@@ -426,6 +428,7 @@ const data_zxcs = []; // 下面的data前的数据调用，需要这个参数，
       return {
         columns_zxcs: columns_zxcs,
         data_zxcs: [],
+        data_zxcs_def: [],
         visible_zxcs: false,
         url: "",
         cookie: "",
@@ -578,14 +581,14 @@ const data_zxcs = []; // 下面的data前的数据调用，需要这个参数，
           });
         this.loading_zxinfo = false;
       },
-      click_info(key) {
+      click_info() {
         // 执行用例时的方法
         this.loading_runcanse = true;
         // this.$http
         axios
           .post(
             "runcase",
-            { ylbh: key },
+            { ylbh: this.data_zxcs_def.ylbh, list: this.data_zxcs_def.reslist},
             {
               headers: { "Content-Type": "application/json", Accept: "*/*" }
             }
@@ -595,6 +598,7 @@ const data_zxcs = []; // 下面的data前的数据调用，需要这个参数，
               this.loading_runcanse = false;
               // this.$message.success("执行成功");
               this.visible_ylgl = false;
+              this.visible_zxcs = false;
               this.click_zxinfo(res.data.zxid);
             } else {
               this.loading_runcanse = false;
@@ -918,11 +922,13 @@ const data_zxcs = []; // 下面的data前的数据调用，需要这个参数，
         axios.get('zxcs', { params: { 'ylbh': ylbh } }).then(response => {
           this.placement_zxcs.pageSize = response.data.maxsize;
           this.data_zxcs = response.data.reslist;
+          this.data_zxcs_def = response.data;
         })
       },
       onClose_zxcs () {
         this.visible_zxcs = false;
         this.data_zxcs = [];
+        this.data_zxcs_def = [];
       },
       handleChange(value, key, column) {
         const newData = [...this.data_zxcs];
@@ -987,6 +993,10 @@ const data_zxcs = []; // 下面的data前的数据调用，需要这个参数，
         this.fileList_upyl = [...this.fileList_upyl, file];
         return false;
       },
+      // updatefile_fun(xh) {
+      //   console.log(xh);
+      //   this.data_yl[xh].update = 1;
+      // },
       del_yl(ylbh) {
         axios.delete('del_yl/' + ylbh).then(res => {
           if (res.data.result === 'success') {
