@@ -23,7 +23,7 @@
               <H3 slot="title">用例列表</H3>
               <span slot="action_yl" slot-scope="record">
                 <!-- <a-button type="primary" :loading="loading_runcanse" @click="click_info(record.ylbh)">执行</a-button> -->
-                <a-button type="primary" :loading="loading_runcanse" @click="child_draw(record.ylbh)"><a-icon type="smile" theme="twoTone" twoToneColor="#ffe600" />执行</a-button>
+                <a-button type="primary" @click="child_draw(record.ylbh)"><a-icon type="smile" theme="twoTone" twoToneColor="#ffe600" />执行</a-button>
                 <a-divider type="vertical" />
                 <a-button type="primary" :loading="loading_download" @click="click_dl_case(record.ylbh)"><a-icon type="cloud-download"/>下载</a-button>
                 <a-divider type="vertical" />
@@ -60,7 +60,7 @@
         :visible="visible_zxcs"
         :destroyOnClose="true"
       >
-        <a-button type="primary" style="margin-bottom: 10px" @click="click_info">按照以下参数执行用例</a-button>
+        <a-button type="primary" style="margin-bottom: 10px" @click="click_info" :loading="loading_runcanse">按照以下参数执行用例</a-button>
         <a-table :columns="columns_zxcs" :scroll="{y:750}" :pagination="placement_zxcs" :dataSource="data_zxcs" tableLayout="fixed" bordered>
           <!-- <template 
             v-for="col in ['zxcs_key', 'zxcs_value']"
@@ -888,7 +888,6 @@ const data_zxcs = []; // 下面的data前的数据调用，需要这个参数，
           url: "/downloadfile/" + ylbh,
           responseType: "blob"
         }).then(response => {
-          console.log(response);
           if (response.headers["content-type"] != "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet") {
             this.$message.error("用例下载失败，可能是文件损坏或丢失，请联系管理员")
           }
@@ -971,7 +970,6 @@ const data_zxcs = []; // 下面的data前的数据调用，需要这个参数，
         const { fileList_upyl } = this;
         const formData = new FormData();
         formData.append("ylbh", ylbh);
-        console.log(this.fileList_upyl);
         fileList_upyl.forEach(file => {
           formData.append("file", file);
         });
