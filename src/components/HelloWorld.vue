@@ -154,31 +154,31 @@ export default {
       data_xm: [
         {
           key: "1",
-          name: "T3C-立案",
+          name: "项目1",
           ylmc: "立案流程V2.5.4-新增当事人",
           time: "2019-10-10 13:55:22"
         },
         {
           key: "2",
-          name: "T3C-立案",
+          name: "项目2",
           ylmc: "立案流程V2.5.4-新增当事人",
           time: "2019-10-10 13:55:22"
         },
         {
           key: "3",
-          name: "T3C-立案",
+          name: "项目3",
           ylmc: "立案流程V2.5.4-新增当事人",
           time: "2019-10-10 13:55:22"
         },
         {
           key: "4",
-          name: "T3C-立案",
+          name: "项目4",
           ylmc: "立案流程V2.5.4-新增当事人",
           time: "2019-10-10 13:55:22"
         },
         {
           key: "5",
-          name: "T3C-立案",
+          name: "项目5",
           ylmc: "立案流程V2.5.4-新增当事人",
           time: "2019-10-10 13:55:22"
         }
@@ -208,7 +208,7 @@ export default {
       data_zx: [
         {
           key: "xm_info",
-          name: "T3C-立案",
+          name: "项目1",
           ylmc: "立案流程V2.5.4-新增当事人",
           tgl: "65%",
           fgl: "95%",
@@ -216,7 +216,7 @@ export default {
         },
         {
           key: "2",
-          name: "T3C-立案",
+          name: "项目2",
           ylmc: "立案流程V2.5.4-新增当事人",
           tgl: "65%",
           fgl: "95%",
@@ -224,7 +224,7 @@ export default {
         },
         {
           key: "3",
-          name: "T3C-立案",
+          name: "项目3",
           ylmc: "立案流程V2.5.4-新增当事人",
           tgl: "65%",
           fgl: "95%",
@@ -232,7 +232,7 @@ export default {
         },
         {
           key: "4",
-          name: "T3C-立案",
+          name: "项目4",
           ylmc: "立案流程V2.5.4-新增当事人",
           tgl: "65%",
           fgl: "95%",
@@ -240,7 +240,7 @@ export default {
         },
         {
           key: "5",
-          name: "T3C-立案",
+          name: "项目5",
           ylmc: "立案流程V2.5.4-新增当事人",
           tgl: "65%",
           fgl: "95%",
@@ -256,28 +256,28 @@ export default {
         defaultPageSize: 500
       },
       chart_data_c: [
-        { genre: "集约化执行T3E", sold: "100%", num: 100 },
-        { genre: "执行救助", sold: "95.65%", num: 95.65 },
-        { genre: "T3C立案", sold: "92.65%", num: 92.65 },
-        { genre: "T3C审判", sold: "85.65%", num: 85.65 },
-        { genre: "T3C审批", sold: "75%", num: 75 },
-        { genre: "T3C案件信息", sold: "72.3%", num: 72.3 },
-        { genre: "T3C诉讼费", sold: "72.3%", num: 72.3 },
-        { genre: "港澳台", sold: "72.3%", num: 72.3 },
-        { genre: "异地执行", sold: "72.3%", num: 72.3 },
-        { genre: "司法辅助", sold: "72.3%", num: 72.3 }
+        { genre: "项目1", sold: "100%", num: 100 },
+        { genre: "项目2", sold: "95.65%", num: 95.65 },
+        { genre: "项目3", sold: "92.65%", num: 92.65 },
+        { genre: "项目4", sold: "85.65%", num: 85.65 },
+        { genre: "项目5", sold: "75%", num: 75 },
+        { genre: "项目6", sold: "72.3%", num: 72.3 },
+        { genre: "项目7", sold: "72.3%", num: 72.3 },
+        { genre: "项目8", sold: "72.3%", num: 72.3 },
+        { genre: "项目9", sold: "72.3%", num: 72.3 },
+        { genre: "项目10", sold: "72.3%", num: 72.3 }
       ],
       chart_data_d: [
-        { genre: "集约化执行T3E", sold: "100%", num: 100 },
-        { genre: "执行救助", sold: "95.65%", num: 95.65 },
-        { genre: "T3C立案", sold: "92.65%", num: 92.65 },
-        { genre: "T3C审判", sold: "85.65%", num: 85.65 },
-        { genre: "T3C审批", sold: "75%", num: 75 },
-        { genre: "T3C案件信息", sold: "72.3%", num: 72.3 },
-        { genre: "T3C诉讼费", sold: "72.3%", num: 72.3 },
-        { genre: "港澳台", sold: "72.3%", num: 72.3 },
-        { genre: "异地执行", sold: "72.3%", num: 72.3 },
-        { genre: "司法辅助", sold: "72.3%", num: 72.3 }
+        { genre: "项目1", sold: "100%", num: 100 },
+        { genre: "项目2", sold: "95.65%", num: 95.65 },
+        { genre: "项目3", sold: "92.65%", num: 92.65 },
+        { genre: "项目4", sold: "85.65%", num: 85.65 },
+        { genre: "项目5", sold: "75%", num: 75 },
+        { genre: "项目6", sold: "72.3%", num: 72.3 },
+        { genre: "项目7", sold: "72.3%", num: 72.3 },
+        { genre: "项目8", sold: "72.3%", num: 72.3 },
+        { genre: "项目9", sold: "72.3%", num: 72.3 },
+        { genre: "项目10", sold: "72.3%", num: 72.3 }
       ]
     };
   },
