@@ -501,7 +501,27 @@ const data_zxcs = []; // 下面的data前的数据调用，需要这个参数，
         this.fetch_ylxx(pageNumber.current);
       },
       handleTableChange_zxinfo(pageNumber) {
-        this.fetch_ylzxinfo(pageNumber.current);
+        //执行信息的详情获取
+        this.loading_zxinfo = true;
+        // this.spinning = true;
+        axios
+          .get("ylzx_info/" + this.zxid + "/" + pageNumber.current, {
+            params: { zt: this.target_key }
+          })
+          .then(response => {
+            this.data_zxinfo = response.data.reslist;
+            this.placement_zxinfo.total = response.data.maxsize;
+            this.placement_zxinfo.current = pageNumber.current;
+            this.tjsj();
+            if (response.data.zt === "0") {
+              setTimeout(() => {
+                this.fetch_ylzxinfo(pageNumber.current);
+              }, 2000);
+            } else {
+              this.spinning = false;
+            }
+          });
+        this.loading_zxinfo = false;
       },
       showDrawer_ylgl() {
         this.fetch_ylxx(1);
@@ -565,9 +585,9 @@ const data_zxcs = []; // 下面的data前的数据调用，需要这个参数，
             this.tjsj();
             if (response.data.zt === "0") {
               setTimeout(() => {
-                this.init_char_cgl();
-                this.init_char_tgl();
-                this.init_char_xysj();
+                // this.init_char_cgl();
+                // this.init_char_tgl();
+                // this.init_char_xysj();
                 this.fetch_ylzxinfo(pagenum);
               }, 2000);
             } else {
