@@ -146,16 +146,30 @@
           <div style="float: right;width: 75%;">
             <a-radio-group :value="target_key" @change="handleSizeChange"
               style="margin-left:5px;margin-right:5px;margin-top: 5px;margin-bottom: 5px">
+              <a-badge :count="count[0]" overflowCount="count[0]">
               <a-radio-button value="1">全部</a-radio-button>
+              </a-badge>
+              <a-badge :count="count[1]" overflowCount="count[1]">
               <a-radio-button value="2">请求成功</a-radio-button>
+              </a-badge>
+              <a-badge :count="count[2]" overflowCount="count[2]">
               <a-radio-button value="3">请求失败</a-radio-button>
+              </a-badge>
+              <a-badge :count="count[3]" overflowCount="count[3]">
               <a-radio-button value="4">验证通过</a-radio-button>
+              </a-badge>
+              <a-badge :count="count[4]" overflowCount="count[4]">
               <a-radio-button value="5">验证失败</a-radio-button>
+              </a-badge>
             </a-radio-group>
             <a-input-search placeholder="请输入用例名称关键字" style="float: right;width: 400px;margin-right: 5px" v-model="gjz" @search="onSearch" enterButton />
             <a-table :columns="columns_zxinfo" :dataSource="data_zxinfo" class="components-table-demo-nested"
               :scroll="{y:670}" size="middle" style="margin-left:5px;margin-right:5px;" :pagination="placement_zxinfo"
               :loading="loading_zxinfo" @change="handleTableChange_zxinfo" :expandRowByClick="true" >
+                <span slot="yzjg" slot-scope="text">
+                  <a-tag :color="text==='通过' ? '#45b97c' : '#ed1941'" :key="text" style="font-size:small;font-weight:bold">{{text}}
+                  </a-tag>
+                </span>
               <a-table slot="expandedRowRender" slot-scope="record" :columns="innerColumns_zxinfo"
                 :dataSource="record.innerlist" :rowKey="record => record.key" :pagination="false" size="small" :expandRowByClick="true"
                 style="margin-left: 15px;margin-right: 15px">
@@ -219,10 +233,10 @@
         style="margin-left: 30px;margin-right: 30px;margin-top: 30px">
         <H3 slot="title">用例执行记录</H3>
         <span slot="action" slot-scope="record">
-          <a-button type="primary" @click="click_zxinfo(record.zxbh)">详情</a-button>
+          <a-button type="primary" @click="click_zxinfo(record.zxbh)"><a-icon type="pie-chart" />详情</a-button>
           <a-divider type="vertical" />
           <a-popconfirm title="确认删除么?" @confirm="() => click_del(record.zxbh)" okText="确认" cancelText="取消">
-            <a-button type="primary" :loading="loading_del">删除</a-button>
+            <a-button type="primary" :loading="loading_del"><a-icon type="delete" />删除</a-button>
           </a-popconfirm>
         </span>
       </a-table>
@@ -389,6 +403,7 @@ const data_zxcs = []; // 下面的data前的数据调用，需要这个参数，
       title: "验证结果",
       dataIndex: "yzjg",
       key: "yzjg",
+      scopedSlots: { customRender: "yzjg" },
       align: "center",
       width: 200
     }
@@ -429,6 +444,7 @@ const data_zxcs = []; // 下面的data前的数据调用，需要这个参数，
     data() {
       this.cacheData = data_zxcs.map(item => ({ ...item }));
       return {
+        count: [], //执行信息中的数量集合
         columns_zxcs: columns_zxcs,
         data_zxcs: [],
         data_zxcs_def: [],
@@ -518,6 +534,7 @@ const data_zxcs = []; // 下面的data前的数据调用，需要这个参数，
             this.data_zxinfo = response.data.reslist;
             this.placement_zxinfo.total = response.data.maxsize;
             this.placement_zxinfo.current = pageNumber.current;
+            this.count = response.data.counts;
             this.tjsj();
             if (response.data.zt === "0") {
               setTimeout(() => {
@@ -587,6 +604,7 @@ const data_zxcs = []; // 下面的data前的数据调用，需要这个参数，
             this.data_zxinfo = response.data.reslist;
             this.placement_zxinfo.total = response.data.maxsize;
             this.placement_zxinfo.current = pagenum;
+            this.count = response.data.counts;
             document.getElementById('char_xysj').innerHTML = '';
             document.getElementById('char_cgl').innerHTML = '';
             document.getElementById('char_tgl').innerHTML = '';
@@ -842,6 +860,7 @@ const data_zxcs = []; // 下面的data前的数据调用，需要这个参数，
             this.data_zxinfo = response.data.reslist;
             this.placement_zxinfo.total = response.data.maxsize;
             this.placement_zxinfo.current = 1;
+            this.count = response.data.counts;
             if (response.data.zt === "0") {
               setTimeout(() => {
                 this.fetch_ylzxinfo(1);
@@ -1060,6 +1079,7 @@ const data_zxcs = []; // 下面的data前的数据调用，需要这个参数，
             this.data_zxinfo = response.data.reslist;
             this.placement_zxinfo.total = response.data.maxsize;
             this.placement_zxinfo.current = 1;
+            this.count = response.data.counts;
             this.tjsj();
             if (response.data.zt === "0") {
               setTimeout(() => {
