@@ -152,6 +152,7 @@
               <a-radio-button value="4">验证通过</a-radio-button>
               <a-radio-button value="5">验证失败</a-radio-button>
             </a-radio-group>
+            <a-input-search placeholder="请输入用例名称关键字" style="float: right;width: 400px;margin-right: 5px" v-model="gjz" @search="onSearch" enterButton />
             <a-table :columns="columns_zxinfo" :dataSource="data_zxinfo" class="components-table-demo-nested"
               :scroll="{y:670}" size="middle" style="margin-left:5px;margin-right:5px;" :pagination="placement_zxinfo"
               :loading="loading_zxinfo" @change="handleTableChange_zxinfo" :expandRowByClick="true" >
@@ -218,9 +219,11 @@
         style="margin-left: 30px;margin-right: 30px;margin-top: 30px">
         <H3 slot="title">用例执行记录</H3>
         <span slot="action" slot-scope="record">
-          <a-button type="primary" :loading="loading" @click="click_zxinfo(record.zxbh)">详情</a-button>
+          <a-button type="primary" @click="click_zxinfo(record.zxbh)">详情</a-button>
           <a-divider type="vertical" />
-          <a-button type="primary" :loading="loading" @click="click_del(record.zxbh)">删除</a-button>
+          <a-popconfirm title="确认删除么?" @confirm="() => click_del(record.zxbh)" okText="确认" cancelText="取消">
+            <a-button type="primary" :loading="loading_del">删除</a-button>
+          </a-popconfirm>
         </span>
       </a-table>
     </div>
@@ -452,6 +455,7 @@ const data_zxcs = []; // 下面的data前的数据调用，需要这个参数，
         visible_tjfx: false,
         visible_ylsc: false,
         fileList: [],
+        gjz: '', //测试用例搜索关键字
         fileList_upyl: [],
         uploading: false,
         placement: "top",
@@ -491,6 +495,7 @@ const data_zxcs = []; // 下面的data前的数据调用，需要这个参数，
         formItemLayout, //生成用例的表单使用
         formTailLayout, //生成用例的表单使用
         form: this.$form.createForm(this, { name: 'dynamic_rule' }), //生成用例的表单使用
+        loading_del: false,
       };
     },
     methods: {
@@ -506,7 +511,8 @@ const data_zxcs = []; // 下面的data前的数据调用，需要这个参数，
         // this.spinning = true;
         axios
           .get("ylzx_info/" + this.zxid + "/" + pageNumber.current, {
-            params: { zt: this.target_key }
+            // params: { zt: this.target_key }
+            params: { zt: this.target_key, gjz: this.gjz }
           })
           .then(response => {
             this.data_zxinfo = response.data.reslist;
@@ -548,6 +554,7 @@ const data_zxcs = []; // 下面的data前的数据调用，需要这个参数，
         this.zxid = "";
         this.loading_download = false;
         this.data_yl = [];
+        this.gjz = '';
       },
       fetch(pagenum) {
         this.loading_list = true;
@@ -573,7 +580,8 @@ const data_zxcs = []; // 下面的data前的数据调用，需要这个参数，
         // this.spinning = true;
         axios
           .get("ylzx_info/" + this.zxid + "/" + pagenum, {
-            params: { zt: this.target_key }
+            // params: { zt: this.target_key }
+            params: { zt: this.target_key, gjz: this.gjz }
           })
           .then(response => {
             this.data_zxinfo = response.data.reslist;
@@ -641,7 +649,19 @@ const data_zxcs = []; // 下面的data前的数据调用，需要这个参数，
         // }, 500);
       },
       click_del(key) {
-        alert("delkey:" + key);
+        // alert("delkey:" + key);
+        this.loading_del = true;
+        axios
+          .post("zx_list/del_zx", { zxbh: key})
+          .then(res => {
+            if (res.data.result === "success") {
+              this.$message.success("删除成功");
+              this.fetch(this.pagination_zx_list.current);
+            } else {
+              this.$message.error("删除失败");
+            }
+          });
+        this.loading_del = false;
       },
       init_char_cgl() {
         var chart = new G2.Chart({
@@ -815,7 +835,8 @@ const data_zxcs = []; // 下面的data前的数据调用，需要这个参数，
         this.target_key = e.target.value;
         axios
           .get("ylzx_info/" + this.zxid + "/" + 1, {
-            params: { zt: this.target_key }
+            // params: { zt: this.target_key }
+            params: { zt: this.target_key, gjz: this.gjz }
           })
           .then(response => {
             this.data_zxinfo = response.data.reslist;
@@ -1027,6 +1048,29 @@ const data_zxcs = []; // 下面的data前的数据调用，需要这个参数，
       claer_ylgx() {
         this.fileList_upyl = []
       },
+      onSearch() {
+        //执行信息的详情获取
+        this.loading_zxinfo = true;
+        // this.spinning = true;
+        axios
+          .get("ylzx_info/" + this.zxid + "/" + 1, {
+            params: { zt: this.target_key, gjz: this.gjz }
+          })
+          .then(response => {
+            this.data_zxinfo = response.data.reslist;
+            this.placement_zxinfo.total = response.data.maxsize;
+            this.placement_zxinfo.current = 1;
+            this.tjsj();
+            if (response.data.zt === "0") {
+              setTimeout(() => {
+                this.fetch_ylzxinfo(1);
+              }, 2000);
+            } else {
+              this.spinning = false;
+            }
+          });
+        this.loading_zxinfo = false;
+      }
     }
   };
 </script>
