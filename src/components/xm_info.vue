@@ -145,7 +145,7 @@
           </div>
           <div style="float: right;width: 75%;">
             <a-radio-group :value="target_key" @change="handleSizeChange"
-              style="margin-left:5px;margin-right:5px;margin-top: 5px;margin-bottom: 5px">
+              style="margin-left:5px;margin-right:5px;margin-top: 5px;margin-bottom: 5px" buttonStyle="solid">
               <a-badge :count="count[0]" overflowCount="count[0]">
               <a-radio-button value="1">全部</a-radio-button>
               </a-badge>
@@ -201,7 +201,7 @@
             </a-form-item>
             <a-form-item :label-col="formTailLayout.labelCol" :wrapper-col="formTailLayout.wrapperCol">
               <a-button type="primary" style="margin-top: 20px;margin-left: 6px" :loading="loading_makecase"
-                @click="casemake">
+                @click="casemake"><a-icon type="file-excel" theme="twoTone" twoToneColor="#52c41a" />
                 生成用例
               </a-button>
             </a-form-item>
@@ -615,7 +615,7 @@ const data_zxcs = []; // 下面的data前的数据调用，需要这个参数，
                 // this.init_char_tgl();
                 // this.init_char_xysj();
                 this.fetch_ylzxinfo(pagenum);
-              }, 2000);
+              }, 5000);
             } else {
               setTimeout(() => {
                 this.init_char_cgl();
