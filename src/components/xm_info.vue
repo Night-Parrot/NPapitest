@@ -137,8 +137,8 @@
     <div style="float: left;">
       <a-drawer title="执行情况" :placement="placement" :closable="true" @close="onClose" :visible="visible_zxinfo"
         :destroyOnClose="true" height="900">
-        <a-spin :spinning="spinning" :delay="delayTime" tip="···用例仍在执行中，请保持冷静，页面会自动检查用例执行情况···">
-          <div style="float: left;width: 24%;">
+        <!-- <a-spin :spinning="spinning" :delay="delayTime" tip="···用例仍在执行中，请保持冷静，页面会自动检查用例执行情况···"> -->
+          <div style="float: left;width: 25%;">
             <div id="char_xysj" style="float: left;"></div>
             <div id="char_cgl" style="float: left;"></div>
             <div id="char_tgl" style="float: left;"></div>
@@ -162,7 +162,20 @@
               <a-radio-button value="5">验证失败</a-radio-button>
               </a-badge>
             </a-radio-group>
-            <a-input-search placeholder="请输入用例名称关键字" style="float: right;width: 400px;margin-right: 5px" v-model="gjz" @search="onSearch" enterButton />
+            <a-input-search placeholder="请输入用例名称关键字" style="float: right;width: 400px;margin-right: 5px;margin-top: 5px" v-model="gjz" @search="onSearch" enterButton />
+            <!-- 进度条 -->
+            <div style="width: 450px;float: right;margin-right: 55px;margin-top: 5px">
+              <div style="width: 400px;float: left;">
+                <a-tooltip placement="top" :title="run_status === '0' ? '执行中': (run_status === '1'? '已完成': '已中断')">
+                  <a-progress :percent="percent" :status="run_status === '1'? 'success' : (run_status === '0' ? 'active' : 'nomal')" style="margin-top: 3px;padding-right: 50px;"
+                  strokeWidth="20" :strokeColor="run_status === '1' ? '#7fb80e' : (run_status === '0' ? '#009ad6' : '#f15a22')" />
+                </a-tooltip>
+              </div>
+              <div style="width:20px;float: right;margin-top: 5px;width: 30px; height: 30px;margin-right: 20px">
+                  <a-icon :type="run_status === '0' ? 'loading' : (run_status === '1' ? 'smile' : 'frown')" style="font-size: 22px" />
+              </div>
+            </div>
+            <!-- 进度条 -->
             <a-table :columns="columns_zxinfo" :dataSource="data_zxinfo" class="components-table-demo-nested"
               :scroll="{y:670}" size="middle" style="margin-left:5px;margin-right:5px;" :pagination="placement_zxinfo"
               :loading="loading_zxinfo" @change="handleTableChange_zxinfo" :expandRowByClick="true" >
@@ -177,7 +190,7 @@
               </a-table>
             </a-table>
           </div>
-        </a-spin>
+        <!-- </a-spin> -->
       </a-drawer>
     </div>
 
@@ -445,6 +458,8 @@ const data_zxcs = []; // 下面的data前的数据调用，需要这个参数，
       this.cacheData = data_zxcs.map(item => ({ ...item }));
       return {
         count: [], //执行信息中的数量集合
+        percent: 50, // 执行进度
+        run_status: '', // 0  执行中，1  已完成，2  已中断
         columns_zxcs: columns_zxcs,
         data_zxcs: [],
         data_zxcs_def: [],
@@ -572,6 +587,8 @@ const data_zxcs = []; // 下面的data前的数据调用，需要这个参数，
         this.loading_download = false;
         this.data_yl = [];
         this.gjz = '';
+        this.percent = 0,
+        this.run_status = ''
       },
       fetch(pagenum) {
         this.loading_list = true;
@@ -605,6 +622,8 @@ const data_zxcs = []; // 下面的data前的数据调用，需要这个参数，
             this.placement_zxinfo.total = response.data.maxsize;
             this.placement_zxinfo.current = pagenum;
             this.count = response.data.counts;
+            this.run_status = response.data.zt;
+            this.percent = response.data.jd;
             document.getElementById('char_xysj').innerHTML = '';
             document.getElementById('char_cgl').innerHTML = '';
             document.getElementById('char_tgl').innerHTML = '';
@@ -692,7 +711,7 @@ const data_zxcs = []; // 下面的data前的数据调用，需要这个参数，
         chart.source(this.data_char_all[0], {
           percent: {
             formatter: function formatter(val) {
-              val = val * 100 + "%";
+              val = (val * 100).toFixed(2) + "%";
               return val;
             }
           }
@@ -751,7 +770,7 @@ const data_zxcs = []; // 下面的data前的数据调用，需要这个参数，
         chart.source(this.data_char_all[1], {
           percent: {
             formatter: function formatter(val) {
-              val = val * 100 + "%";
+              val = (val * 100).toFixed(2) + "%";
               return val;
             }
           }
