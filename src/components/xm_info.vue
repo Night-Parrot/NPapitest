@@ -167,7 +167,7 @@
             <div style="width: 450px;float: right;margin-right: 55px;margin-top: 5px">
               <div style="width: 400px;float: left;">
                 <a-tooltip placement="top" :title="run_status === '0' ? '执行中': (run_status === '1'? '已完成': '已中断')">
-                  <a-progress :percent="percent" :status="run_status === '1'? 'success' : (run_status === '0' ? 'active' : 'nomal')" style="margin-top: 3px;padding-right: 50px;"
+                  <a-progress :percent="percent.toFixed(2)" :status="run_status === '1'? 'success' : (run_status === '0' ? 'active' : 'nomal')" style="margin-top: 3px;padding-right: 50px;"
                   strokeWidth="20" :strokeColor="run_status === '1' ? '#7fb80e' : (run_status === '0' ? '#009ad6' : '#f15a22')" />
                 </a-tooltip>
               </div>
@@ -457,9 +457,9 @@ const data_zxcs = []; // 下面的data前的数据调用，需要这个参数，
     data() {
       this.cacheData = data_zxcs.map(item => ({ ...item }));
       return {
-        count: [], //执行信息中的数量集合
-        percent: 50, // 执行进度
-        run_status: '', // 0  执行中，1  已完成，2  已中断
+        count: [0,0,0,0,0], //执行信息中的数量集合
+        percent: 0, // 执行进度
+        run_status: '0', // 0  执行中，1  已完成，2  已中断  字符串格式
         columns_zxcs: columns_zxcs,
         data_zxcs: [],
         data_zxcs_def: [],
@@ -588,7 +588,8 @@ const data_zxcs = []; // 下面的data前的数据调用，需要这个参数，
         this.data_yl = [];
         this.gjz = '';
         this.percent = 0,
-        this.run_status = ''
+        this.run_status = 0,
+        this.count = [0,0,0,0,0]
       },
       fetch(pagenum) {
         this.loading_list = true;
@@ -610,6 +611,7 @@ const data_zxcs = []; // 下面的data前的数据调用，需要这个参数，
       },
       fetch_ylzxinfo(pagenum) {
         //执行信息的详情获取
+        this.run_status = 0;
         this.loading_zxinfo = true;
         // this.spinning = true;
         axios
@@ -620,7 +622,7 @@ const data_zxcs = []; // 下面的data前的数据调用，需要这个参数，
           .then(response => {
             this.data_zxinfo = response.data.reslist;
             this.placement_zxinfo.total = response.data.maxsize;
-            this.placement_zxinfo.current = pagenum;
+            this.placement_zxinfo.current = response.data.nowpage;
             this.count = response.data.counts;
             this.run_status = response.data.zt;
             this.percent = response.data.jd;
@@ -633,8 +635,8 @@ const data_zxcs = []; // 下面的data前的数据调用，需要这个参数，
                 // this.init_char_cgl();
                 // this.init_char_tgl();
                 // this.init_char_xysj();
-                this.fetch_ylzxinfo(pagenum);
-              }, 5000);
+                this.fetch_ylzxinfo(this.placement_zxinfo.current);
+              }, 8000);
             } else {
               setTimeout(() => {
                 this.init_char_cgl();
@@ -674,7 +676,7 @@ const data_zxcs = []; // 下面的data前的数据调用，需要这个参数，
         setTimeout(() => {
           this.fetch_ylxx(this.pagination_yl_list.current);
           this.fetch(1);
-        }, 1000);
+        }, 3000);
       },
       click_zxinfo(key) {
         this.visible_zxinfo = true;
@@ -942,7 +944,7 @@ const data_zxcs = []; // 下面的data前的数据调用，需要这个参数，
                 // console.log(response.headers["content-type"]);
                 if (response.headers["content-type"] != "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet") {
                   this.$message.error("用例生成失败，请检查填写的内容或联系管理员")
-                }
+                } 
                 else {
                   let blob = new Blob([response.data], {
                     type: response.headers["content-type"]
@@ -1101,9 +1103,7 @@ const data_zxcs = []; // 下面的data前的数据调用，需要这个参数，
             this.count = response.data.counts;
             this.tjsj();
             if (response.data.zt === "0") {
-              setTimeout(() => {
                 this.fetch_ylzxinfo(1);
-              }, 2000);
             } else {
               this.spinning = false;
             }
