@@ -5,6 +5,7 @@ import testlist from './components/test_list.vue'
 import xm_info from './components/xm_info.vue'
 import about from './views/About.vue'
 import test_page from './components/test.vue'
+import toolbox from './components/toolbox.vue'
 
 Vue.use(Router)
 
@@ -37,6 +38,11 @@ export default new Router({
       path: '/testpage',
       name: '测试页面',
       component: test_page
+    },
+    {
+      path: '/toolbox',
+      name: '工具箱',
+      component: toolbox
     }
   ]
 })

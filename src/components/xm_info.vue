@@ -184,7 +184,7 @@
                   </a-tag>
                 </span>
               <a-table slot="expandedRowRender" slot-scope="record" :columns="innerColumns_zxinfo"
-                :dataSource="record.innerlist" :rowKey="record => record.key" :pagination="false" size="small" :expandRowByClick="true"
+                :dataSource="record.innerlist" :rowKey="record => record.key" :pagination="false" size="small" :expandRowByClick="false"
                 style="margin-left: 15px;margin-right: 15px">
                 <p slot="expandedRowRender" slot-scope="record" style="margin: 0">{{record.matchinfo}}</p>
               </a-table>
@@ -588,7 +588,7 @@ const data_zxcs = []; // 下面的data前的数据调用，需要这个参数，
         this.data_yl = [];
         this.gjz = '';
         this.percent = 0,
-        this.run_status = 0,
+        this.run_status = '0',
         this.count = [0,0,0,0,0]
       },
       fetch(pagenum) {
