@@ -1,0 +1,29 @@
+version: 1
+disable_existing_loggers: False
+formatters:
+ simple:
+   format: '%(asctime)s [%(name)s:%(lineno)d] [%(filename)s] [%(levelname)s]- %(message)s'
+   datefmt: '%F %T'
+handlers:
+ console:
+   class: logging.StreamHandler
+   level: DEBUG
+   formatter: simple
+   stream: ext://sys.stdout
+ console_file:
+   class : logging.handlers.TimedRotatingFileHandler
+   level: DEBUG
+   formatter: simple
+   filename: ./logs/apitest_log.log
+   interval: 5
+   backupCount: 30
+   encoding: utf8
+   when: H
+loggers:
+ runLogger:
+   level: INFO
+   handlers: [console_file]
+   propagate: 0
+root:
+ level: DEBUG
+ handlers: [console]
