@@ -10,7 +10,7 @@
 - 支持通过swagger-ui生成用例模板
 
 
-##### 具体操作可以下载查看[使用说明](https://raw.githubusercontent.com/Night-Parrot/NPapitest/master/upload/%E4%BD%BF%E7%94%A8%E8%AF%B4%E6%98%8E.docx "使用说明")
+##### 具体操作可以查看[使用说明](https://docs.qq.com/doc/DRWpQUHJBR0lncG1n "使用说明")
 
 
 ##### 学习交流&使用问题  请邮件联系  youdewo@163.com
