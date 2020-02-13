@@ -1,4 +1,4 @@
 .vscode/settings.json
 .vscode/*.log
 config.ini
-
+.idea/vcs.xml
