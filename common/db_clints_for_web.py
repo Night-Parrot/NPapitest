@@ -11,32 +11,6 @@ logger = my_log.LogUtil().getLogger()
 
 
 
-# def db_clints(db_info):
-#     db_clints = {}
-#     if len(db_info) == 0:
-#         logger.info('用例中未读取到数据库配置信息')
-#         return False 
-#     for db_clint in db_info:
-#         try:
-#             database = db_info[db_clint]['db_name']
-#             user = db_info[db_clint]['db_user']
-#             password = db_info[db_clint]['db_password']
-#             host = db_info[db_clint]['db_ip']
-#             port = db_info[db_clint]['db_port']
-#             db_fun = []
-#             build_db_for_commit = psycopg2.connect(
-#                 database=database, user=user, password=password, host=host, port=port)
-#             db_fun.append(build_db_for_commit)
-#             build_db_for_cur = build_db_for_commit.cursor(
-#                 cursor_factory=psycopg2.extras.RealDictCursor)
-#             db_fun.append(build_db_for_cur)
-#             db_clints[db_clint] = db_fun
-#             return db_clints
-#         except Exception as eee:
-#             logger.error('创建用例内数据库连接的错误信息：' + str(eee))
-#             return False
-
-
 def db_clints(db_info):
     if len(db_info) == 0:
         logger.info('用例中未读取到数据库配置信息')
