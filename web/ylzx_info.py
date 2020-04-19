@@ -2,6 +2,7 @@ import os
 import sys
 import asyncio
 from flask import Blueprint, Flask, abort, jsonify, request
+from flask_login import login_required
 import math
 
 from common import my_log
@@ -14,8 +15,10 @@ sys.path.append(o_path)
 logger = my_log.LogUtil().getLogger()
 from main import all_dbc
 
+
 @asyncio.coroutine
 @main.route('/ylzx_info/<zxid>/<pagenum>', methods=['get'])
+@login_required
 def ylzx_info(zxid, pagenum): #列表查询，返回总页数、总条数、每页数，支持状态参数
     zxid = zxid
     pagenum = pagenum
@@ -39,7 +42,7 @@ def ylzx_info(zxid, pagenum): #列表查询，返回总页数、总条数、每�
     sql_num_base_cg = "SELECT count(1) as counts FROM db_apitesting.t_at_qqxx WHERE c_bh_zx = '%s' AND n_jkzt = '200'" % zxid
     sql_num_base_tg = "SELECT count(1) as counts FROM db_apitesting.t_at_qqxx WHERE c_bh_zx = '%s' AND c_yzjg != '不通过'" % zxid
     sql_base = "SELECT c_bh as key, n_qqmc as name, c_qqdz as url, c_xysj as xysj, to_char(dt_zxsj, 'yyyy-mm-dd hh24:mi:ss') as zxsj, "\
-                "n_jkzt as jkzt, c_yzjg as yzjg, c_qqcs as cs, c_yqfhz as yqfhz, c_sjfhz as sjfhz, c_matchinfo as matchinfo "\
+                "n_jkzt as jkzt, c_yzjg as yzjg, c_qqcs as cs, c_yqfhz as yqfhz, c_sjfhz as sjfhz, c_matchinfo as matchinfo, c_ycxx as ycxx "\
                 "FROM db_apitesting.t_at_qqxx WHERE c_bh_zx = '%s'" % zxid
     like_text = " and n_qqmc like '%s'" % str("%" + gjz + "%")
     paga = " order by n_xh LIMIT 10 OFFSET " + str((int(pagenum)-1) * 10)
@@ -78,7 +81,7 @@ def ylzx_info(zxid, pagenum): #列表查询，返回总页数、总条数、每�
     project_dict['counts'] = data_list
     project_dict['nowpage'] = int(pagenum)
     for info in list_all:
-        re_name = ['key', 'cs', 'yqfhz', 'sjfhz', 'matchinfo']
+        re_name = ['key', 'cs', 'yqfhz', 'sjfhz', 'matchinfo', 'ycxx']
         re_dict = {}
         for n in re_name:
             re_dict[n] = info[n]

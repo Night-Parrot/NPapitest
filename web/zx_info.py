@@ -2,6 +2,7 @@ import os
 import sys
 import asyncio
 from flask import Blueprint, Flask, abort, jsonify, request
+from flask_login import login_required
 import math
 
 from common import my_log
@@ -17,6 +18,7 @@ from main import all_dbc
 
 @asyncio.coroutine
 @main.route('/tjxx', methods=['get'])
+@login_required
 def tjxx():
     if not request.args or 'zxid' not in request.args:
         abort(400)
@@ -65,8 +67,10 @@ def tjxx():
 # date: "接口111",
 # actual: 175,
 # expected: 400
+
 @asyncio.coroutine
 @main.route('/sjfb', methods=['get'])
+@login_required
 def sjfb():
     if not request.args or 'zxid' not in request.args:
         abort(400)
@@ -78,5 +82,8 @@ def sjfb():
         logger.error('查询分布时间的sql错误:' + str(eee))
         return jsonify({'result': 'fail', 'msg': '查询失败'})
     for num in range(len(sql_sjfb_res)):
-        sql_sjfb_res[num]['actual'] = int(float((sql_sjfb_res[num]['actual'])[:-1])*1000)
+        if str(sql_sjfb_res[num]['actual']) == '0':
+            sql_sjfb_res[num]['actual'] = 0
+        else:
+            sql_sjfb_res[num]['actual'] = int(float((sql_sjfb_res[num]['actual'])[:-1])*1000)
     return jsonify(sql_sjfb_res)

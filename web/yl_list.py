@@ -3,6 +3,7 @@ import sys
 import asyncio
 from flask import Blueprint, Flask, abort, jsonify, request
 import math
+from flask_login import login_required
 
 from common import my_log
 
@@ -17,8 +18,9 @@ from main import all_dbc
 
 @asyncio.coroutine
 @main.route('/<xmurl>/yl_list/<pagenum>', methods=['get'])
+@login_required
 def yl_list(xmurl, pagenum): #列表查询，返回总页数、总条数、每页数据
-    sql_list = "select yl.c_bh as ylbh,yl.c_ylmc as ylmc,to_char(yl.dt_scsj, 'yyyy-mm-dd hh24:mi:ss') as scsj,yl.n_zxcs as zxcs "\
+    sql_list = "select yl.c_bh as ylbh,yl.c_ylmc as ylmc,to_char(yl.dt_scsj, 'yyyy-mm-dd hh24:mi:ss') as scsj,yl.n_zxcs as zxcs,yl.c_sfbj as bjzt "\
     "from db_apitesting.t_at_xmxx xm left join db_apitesting.t_at_ylxx yl on xm.c_bh = yl.c_bh_xm "\
     "where xm.c_url = '%s' ORDER by yl.dt_scsj desc LIMIT %s OFFSET %s;" % (xmurl, 8, (int(pagenum) - 1)*8)
     sql_count = "select count(1) as counts "\
@@ -29,7 +31,7 @@ def yl_list(xmurl, pagenum): #列表查询，返回总页数、总条数、每�
         res_count = all_dbc.pg_select_operator(sql_count)
         # 判断一下最大页数，如果当前请求页数超出数据的最大页数，直接返回最大页的数据
         if math.ceil(res_count[0]['counts']/8) < int(pagenum):
-            sql_list = "select yl.c_bh as ylbh,yl.c_ylmc as ylmc,to_char(yl.dt_scsj, 'yyyy-mm-dd hh24:mi:ss') as scsj,yl.n_zxcs as zxcs "\
+            sql_list = "select yl.c_bh as ylbh,yl.c_ylmc as ylmc,to_char(yl.dt_scsj, 'yyyy-mm-dd hh24:mi:ss') as scsj,yl.n_zxcs as zxcs,yl.c_sfbj as bjzt "\
                     "from db_apitesting.t_at_xmxx xm left join db_apitesting.t_at_ylxx yl on xm.c_bh = yl.c_bh_xm "\
                     "where xm.c_url = '%s' ORDER by yl.dt_scsj desc LIMIT %s OFFSET %s;" % (xmurl, 8, (int(math.ceil(res_count[0]['counts']/8)) - 1)*8)
             pagenum = math.ceil(res_count[0]['counts']/8)
@@ -53,6 +55,7 @@ def yl_list(xmurl, pagenum): #列表查询，返回总页数、总条数、每�
 
 @asyncio.coroutine
 @main.route('/del_yl/<ylbh>', methods=['delete'])
+@login_required
 def yl_del(ylbh): #用例记录删除，todo缺少文件实体的删除
     sql_path = "SELECT c_bclj as yllj FROM db_apitesting.t_at_ylxx WHERE c_bh = '%s'" % ylbh #查询路径，要先查
     sql_del_yl = "DELETE FROM db_apitesting.t_at_ylxx WHERE c_bh = '%s'" % ylbh #删除ylxx主表的数据
