@@ -10,4 +10,4 @@ o_path = os.getcwd()
 sys.path.append(o_path)
 sys.path.append('..')
 
-from . import project_list, yl_list, zx_list, up_down_file, run_case, ylzx_info, make_case, zx_info, tool_box
+from . import project_list, yl_list, zx_list, up_down_file, run_case, ylzx_info, make_case, zx_info, tool_box, login, edit_page, cache_control, statistics, ci_control, tc_list
