@@ -1,4 +1,3 @@
-from common import my_log
 import re
 import os
 import zipfile
@@ -11,15 +10,17 @@ from faker import Factory
 import datetime
 
 
+
 o_path = os.getcwd()
 sys.path.append(o_path)
+from common import my_log
 logger = my_log.LogUtil().getLogger()
 faker = Factory.create('zh_CN')
 
 
+
 def next_id():
     return uuid.uuid4().hex
-
 
 def sql_split(str_sql):
     sql_list = []
@@ -37,7 +38,9 @@ def sql_split(str_sql):
             except Exception as eee:
                 logger.error('sql分组报错：' + str(eee))
                 logger.info('报错的具体sql：' + str(groups))
+                return ({'erroriofo': str(eee)})
     return sql_list
+
 
 
 def default_function(key_name):
@@ -45,6 +48,10 @@ def default_function(key_name):
         return uuid.uuid4().hex
     else:
         return False
+
+
+
+
 
 
 def replace_for_web(str_r, keywords={}):
@@ -121,25 +128,21 @@ def replace_for_web(str_r, keywords={}):
                         if date_info[2] == 'ymd':
                             str_r = str_r.replace(
                                 "{{" + all_re[xh] + "}}", str(date_time)[:10])
-                    except:
+                    except Exception as eee:
                         str_r = str_r
                 else:
                     str_r = str_r
             elif all_re[xh] in keynames:
-                str_r = str_r.replace(
-                    "{{" + all_re[xh] + "}}", keywords[all_re[xh]])
+                str_r = str_r.replace( "{{" + all_re[xh] + "}}", keywords[all_re[xh]])
             else:
                 pass
     return str_r
 
-
 def ZipFile(path, destPath):
     try:
         zf = zipfile.ZipFile(destPath, "w", zipfile.ZIP_DEFLATED)
-        for dirpath, dirnames, filenames in os.walk(path):
-            # 将当前目录替换为空，即以当前目录为相对目录，如果当前目录下面还存在文件夹，则fpath为 【/子目录】
-            logger.info(dirnames)
-            fpath = dirpath.replace(path, "")
+        for dirpath,dirnames,filenames in os.walk(path):
+            fpath = dirpath.replace(path, "") # 将当前目录替换为空，即以当前目录为相对目录，如果当前目录下面还存在文件夹，则fpath为 【/子目录】
             fpath = fpath and fpath + os.sep or ""
             for file in filenames:
                 zf.write(os.path.join(dirpath, file), fpath+file)
@@ -152,8 +155,6 @@ def ZipFile(path, destPath):
 这是一个用来处理sybase查询结果的方法，目的是为了将查询结果转化为dict
 当查询结果为多条时，逐条转化为dict并封装到一个list中返回
 '''
-
-
 def row_name(sql, sql_res):
     aaa = re.findall('SELECT(.+?)FROM', sql)
     bbb = re.split(',', aaa[0])
@@ -163,7 +164,7 @@ def row_name(sql, sql_res):
         ccc = re.findall('AS (.*)', name)
         if len(ccc) == 0:
             ccc = [name]
-        p = re.compile(r"^\s+|\s+$")
+        p = re.compile("^\s+|\s+$")
         ccc[0] = re.sub(p, '', ccc[0])
         names.append(ccc[0])
     if len(sql_res[0]) == len(names):
@@ -183,9 +184,39 @@ def row_name(sql, sql_res):
     return res_all
 
 
+
+
+'''
+lower2upper是用来处理数据库查询中，AS后的名称会自动变成小写的情况，通过一顿操作猛如虎，将AS后的名称变为预期的、可带大写字母的。
+'''
+def lower2upper(sql, sql_res):
+    ccc = re.findall(r'[S-s][E-e][L-l][E-e][C-c][T-t]\s(.+?)\s[F-f][R-r][O-o][M-m]', sql)
+    bbb = re.split(',', ccc[0])
+    row_key = {}
+    logger.info('查询结果：' + str(sql_res))
+    for row_name in bbb:
+        ddd = re.findall(r'\s[A-a][S-s]\s(.+)', row_name)
+        if ddd[0].strip().lower() == ddd[0].strip():
+            continue
+        else:
+            row_key[ddd[0].strip().lower()] = ddd[0].strip()
+    logger.info('替换词组：' + str(row_key))
+    for res in sql_res:
+        for key_res in res:
+            if key_res in row_key.keys():
+                value = res[key_res]
+                del res[key_res]
+                res[row_key[key_res]] = value
+            else:
+                continue
+    logger.info('替换后的sql返回值：' + str(sql_res))
+    return sql_res
+
+
+
 if __name__ == '__main__':
-    db = "1;2;3;4;5;"
-    print(re.split(r';', str(db)))
-    # print('@uuid'.upper())
-    for num in range(50):
-        print(replace_for_web('{{!uuid}}'))
+    sql = "select c_bh AS bhAj from t_zx_aj"
+    aaa = re.findall('SELECT(.+?)FROM', sql)
+    bbb = re.split(',', aaa[0])
+    print(aaa)
+    print(bbb)
