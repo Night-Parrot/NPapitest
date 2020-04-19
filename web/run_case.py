@@ -4,7 +4,7 @@ import json
 import math
 import os
 import sys
-
+from flask_login import login_required
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -27,7 +27,7 @@ logger = my_log.LogUtil().getLogger()
 from main import all_dbc
 
 
-
+@login_required
 @asyncio.coroutine
 @main.route('/runcase', methods=['post'])
 def run_case():
@@ -36,13 +36,26 @@ def run_case():
     # 根据ylbh查询出用例对应的用例文件
     ylbh = request.json['ylbh']
     cs_res = request.json['list']
+    sfjs = request.json['sfjs']
+    api_docs = request.json['api_docs']
+    if sfjs:
+        if str(api_docs) != '':
+            if str(api_docs[:4]).upper() == 'HTTP':
+                pass
+            else:
+                try:
+                    api_docs = int(api_docs)
+                except:
+                    return jsonify({'result': 'fail', 'msg': '接口地址错误或数量书写不规范'})
+        else:
+            return jsonify({'result': 'fail', 'msg': '接口地址错误或数量书写不规范'})
     # 删除之前的参数
     cs_del_sql = "DELETE FROM db_apitesting.t_at_zxcs WHERE c_bh_yl = '%s'" % ylbh
     try:
         all_dbc.pg_delete_operator(cs_del_sql)
     except Exception as eee:
         logger.error('删除参数信息报错:' + str(eee))
-        return jsonify({'result': 'fail', 'msg':' 删除参数失败'})
+        return jsonify({'result': 'fail', 'msg': '删除参数失败'})
     intnum = 1
     new_kv = {}
     for num in range(len(cs_res)):
@@ -87,18 +100,12 @@ def run_case():
     db_clints_for_web.db_tools().db_close()
     logger.info("完成关闭数据链接")
      # 更新执行次数
-    zx_num = "UPDATE db_apitesting.t_at_ylxx SET n_zxcs = n_zxcs + 1 WHERE c_bh = '%s';" % ylbh
+    zx_num = "UPDATE db_apitesting.t_at_ylxx SET n_zxcs = n_zxcs + 1, c_api_count = '%s' WHERE c_bh = '%s';" % (api_docs, ylbh)
     try:
         all_dbc.pg_update_operator(zx_num)
     except Exception as eee:
         logger.error('更新执行次数失败' + str(eee))
         return jsonify({'result': 'fail', 'msg': str(eee)})
-     # 插入用例执行记录
-    zxid = base_tool.next_id()
-    # 开始执行用例
-    logger.info('···开始调用线程池···')
-    run_caselist_new.run_caselist(zxid, ylbh, case_info_all)
-    logger.info('···调用线程池完毕···')
     '''
     # 创建子进程
     ~~~~~此处由于进程创建时完整复制当前进程的内容，包括数据库连接，因此会导致在主进程（不知原因，可能是因为程序报错）关闭时，导致子进程的数据库连接发生异常~~~~~
@@ -112,28 +119,20 @@ def run_case():
         return jsonify({'result': 'fail', 'msg': str(eaa)})
     logger.info('子进程状态' + str(p.is_alive()))
     '''
-    '''
-    runcase_data = {'zxid': str(zxid),'ylbh': str(ylbh),'case_info_all': str(case_info_all)}
-    runcase_data = json.dumps(runcase_data, ensure_ascii=False)
-    logger.info(str(runcase_data))
-    headers = {'Content-Type': 'application/json'}
-    try:
-        # requests.post('http//:localhost:9999/apitest/runcase_for_real', data=runcase_data)
-        requests.post('http://172.18.49.18:8585/runcase_for_real', data=runcase_data.encode('utf-8'), headers=headers, allow_redirects=False)
-    except Exception as eee:
-        logger.error('调用执行用例接口失败：' + str(eee))
-        return jsonify({'result': 'fail', 'msg': str(eee)})
-    logger.info('用例执行接口调用成功')
-    '''
-    zxjl_sql = "INSERT INTO db_apitesting.t_at_zxxx(c_bh, c_bh_yl, dt_zxsj, c_fgl, c_cgl, c_tgl, n_zt, c_cg, c_wcg, c_tg, c_wtg) VALUES"\
-                " ('%s', '%s', now(), 0, 0, 0, 0, 0, 0, 0, 0);" % (zxid, ylbh)
+# 插入用例执行记录
+    zxid = base_tool.next_id()
+    zxjl_sql = "INSERT INTO db_apitesting.t_at_zxxx(c_bh, c_bh_yl, dt_zxsj, c_fgl, c_cgl, c_tgl, n_zt, c_cg, c_wcg, c_tg, c_wtg, c_sfci) VALUES"\
+                " ('%s', '%s', now(), 0, 0, 0, 0, 0, 0, 0, 0, 1);" % (zxid, ylbh)
     try:
         all_dbc.pg_insert_operator(zxjl_sql)
     except Exception as eee:
         logger.error('插入执行信息失败' + str(eee))
         return jsonify({'result': 'fail', 'msg': str(eee)})
+    # 开始执行用例
+    logger.info('···开始调用线程池···')
+    run_caselist_new.run_caselist(zxid, ylbh, case_info_all, api_docs, sfjs)
+    logger.info('···调用线程池完毕···')
     return jsonify({'result': 'success', 'msg': '成功', 'zxid': zxid})
-
 
 
 
@@ -146,20 +145,30 @@ def zxcs():
     # 根据ylbh查询出对应的执行参数
     zxcs_sql_count = "SELECT count(1), c_bh_yl as ylbh FROM db_apitesting.t_at_zxcs WHERE c_bh_yl = '%s' GROUP BY c_bh_yl" % ylbh
     zxcs_sql = "SELECT c_bh as key, c_key as zxcs_key, c_value as zxcs_value FROM db_apitesting.t_at_zxcs WHERE c_bh_yl = '%s' ORDER BY n_xh ASC" % ylbh
+    api_count = "SELECT c_api_count AS api_docs FROM db_apitesting.t_at_ylxx WHERE c_bh = '%s';" % ylbh
     try:
         counts = all_dbc.pg_select_operator(zxcs_sql_count)
-        list = all_dbc.pg_select_operator(zxcs_sql)
+        list_cs = all_dbc.pg_select_operator(zxcs_sql)
+        api = all_dbc.pg_select_operator(api_count)
     except Exception as eee:
         logger.error('查询参数的sql报错了：' + str(eee))
         return jsonify({'result': 'fail', 'msg': str(eee)})
     res_info = {}
     if len(counts) != 1:
         res_info['ylbh'] = ylbh
+        if len(api) != 1:
+            res_info['api_docs'] = ''
+        else:
+            res_info['api_docs'] = api[0]['api_docs']
         res_info['maxsize'] = 0
         res_info['reslist'] = []
         return jsonify(res_info)
     else:
         res_info['ylbh'] = counts[0]['ylbh']
+        if len(api) != 1:
+            res_info['api_docs'] = ''
+        else:
+            res_info['api_docs'] = api[0]['api_docs']
         res_info['maxsize'] = counts[0]['count']
-        res_info['reslist'] = list
+        res_info['reslist'] = list_cs
         return jsonify(res_info)
