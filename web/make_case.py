@@ -13,6 +13,7 @@ import pandas as pd
 from flask import (Blueprint, Flask, abort, jsonify, request,
                    send_from_directory, send_file, make_response, Response)
 from flask_uploads import UploadSet, configure_uploads, patch_request_class
+from flask_login import login_required
 
 from common import base_tool
 from common import build_case_in_swagger as sw
@@ -28,6 +29,7 @@ logger = my_log.LogUtil().getLogger()
 
 @asyncio.coroutine
 @main.route('/makecase', methods=['get'])
+@login_required
 def make_case():
     if not request.args or 'url' not in request.args:
         abort(400)
@@ -40,9 +42,10 @@ def make_case():
     if url == '':
         return jsonify({'result': 'fail', 'msg': 'swagger地址是必填项'})
     try:
-        swagger_info = sw.swagger(url, cookie)
+        swagger_info = sw.swagger(url.strip(), cookie)
     except Exception as eee:
         logger.error("用例生成的错误：" + str(eee))
+        logger.exception(eee)
         return jsonify({'result': 'fail', 'msg': str(eee)})
     try:
         key_names = re.findall(r'{{(.*?)}}', str(swagger_info[0]))
