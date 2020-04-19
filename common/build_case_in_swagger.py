@@ -95,6 +95,50 @@ def swagger(url, cookie):
 
 
 
-# if __name__ == '__main__':
-#     aaa = swagger('http://172.18.12.118:9070/t3e-jyhzx/v2/api-docs', 'userToken=eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJtc3AtZ2F0ZXdheSIsInVzZXJJZCI6IjE2MDM1MTE0MzMiLCJpcCI6IjE3Mi4xOC40OS4xOCIsImV4cERhdGUiOjE1NjU2NjIwODQyMDQsInRndCI6IlRHVC0zMjc4LXlXRjNncWpBcFBtOUk2S2FmSExkejk5ZnpyN250NWZNV05aWkRKb2JXYmVxekE2bDVULWNhcyIsInN0IjoiU1QtMTk2MzYtUmVPTkpzMk9UQ0F2UU9vZzc1ZG0tY2FzIiwiaWF0IjoxNTY1NjYyMDI0fQ.3D5BJmcmIuyoLRg_Kf4COg5rRnIQb6E_7CgAuk6MOWjrwc5WSeEnuZr8Bj44XOxr8NRB9rBOc4H_rOn_pajrlA; JSESSIONID=node01asor0qltp5qkaahs449h51wg15132.node0')
-#     print(aaa)
+def swagger_count(all_url, cookie):
+    if ',' in all_url:
+        url_list = re.split(r',', all_url)
+    else:
+        url_list = [all_url]
+    all_api_info = {}
+    for url in url_list:
+        if str(url)[0] != 'h':
+            url = str('http://') + str(url)
+        else:
+            pass
+         # 初始化参数，防止后续在赋值前被引用
+        req = requests.get(url, headers={'cookie': cookie})
+        if req.status_code == '401':
+            req = requests.get(url, headers={'cookie': cookie})
+        try:
+            json_new = req.json()
+        except Exception as ggg:
+            logger.error('swagger地址返回的不数据不是json：' + str(ggg))
+            return False
+        caselist = []
+        try:
+            ssr = {}
+            if json_new['basePath'] == '/':
+                ssr['value'] = ''
+            else:
+                ssr['value'] = json_new['basePath']
+            num = 0
+            for path in json_new['paths']:
+                for a in json_new['paths'][path]:
+                    ssr['method'] = a
+                    ssr['path'] = str(path)
+                    url_path = '/' + ssr['method'] + ssr['value'] + ssr['path']
+                    url_path = re.sub(r'{[^\s]*?}', '{*}', url_path)
+                    caselist.append(url_path)
+            all_info = {'counts': len(caselist), 'info': caselist}
+            b = re.findall(r'[a-zA-z]+://[^\s]*?/', url)
+            all_api_info[b[0]] = all_info
+        except Exception as aaa:
+            logger.error('解析swagger返回数据最外层报错：' + str(eee))
+            return False
+    return all_api_info
+
+
+if __name__ == '__main__':
+    aaa = swagger_count('http://172.18.17.177:30120/v2/api-docs', '')
+    print(aaa)
