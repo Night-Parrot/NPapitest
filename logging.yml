@@ -18,7 +18,7 @@ handlers:
    interval: 5
    backupCount: 30
    encoding: utf8
-   when: H
+   when: D
 loggers:
  runLogger:
    level: INFO
