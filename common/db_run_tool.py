@@ -10,9 +10,9 @@ import psycopg2             # postgresql用的
 import psycopg2.extras      # postgresql用的
 import json
 
-from common import my_log, re_fun_for_web, base_tool
+# from common import my_log, re_fun_for_web, base_tool
 
-logger = my_log.LogUtil().getLogger()
+# logger = my_log.LogUtil().getLogger()
 
 
 import pandas as pd
@@ -41,7 +41,7 @@ def read_dbinfo(file_path):
 
 def db_tool_connect(db_info):
     if len(db_info) == 0:
-        logger.info('用例中未读取到数据库配置信息')
+        # logger.info('用例中未读取到数据库配置信息')
         return False 
     db_connect = {}
     for name in db_info:
@@ -62,7 +62,7 @@ def db_tool_connect(db_info):
                 db_fun.append(db_info[name]['db_type'].upper())
                 db_connect[name] = db_fun
             except Exception as eee:
-                logger.error('ABASE创建的错误信息：' + str(eee))
+                # logger.error('创建用例内数据库连接的错误信息：' + str(eee))
                 return False
         elif db_info[name]['db_type'].upper() == 'SYBASE':
             try:
@@ -74,7 +74,7 @@ def db_tool_connect(db_info):
                 db_fun.append(db_info[name]['db_type'].upper())
                 db_connect[name] = db_fun
             except Exception as eee:
-                logger.error('SYBASE创建的错误信息：' + str(eee))
+                # logger.error('创建sybase的错误信息：' + str(eee))
                 return False
         else:
             pass
